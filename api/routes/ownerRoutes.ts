@@ -1,14 +1,11 @@
 import { Router } from 'express';
-import * as ownerService from '../services/ownerService';
+import * as ownerController from '../controllers/ownerController';
 import { validateToken } from '../middleware/tokenValidation';
-
-// import { upload, handleError } from '../middleware/uploadMiddleware';
 
 const ownerRouter = Router();
 
-// Global Routes
-ownerRouter.get('/:id', ownerService.getOwnerById);
-ownerRouter.get('/', ownerService.getAllOwners);
-ownerRouter.patch('/', validateToken, ownerService.updateOwner);
+ownerRouter.get('/:id', ownerController.getOwnerById);
+ownerRouter.get('/', ownerController.getAllOwners);
+ownerRouter.patch('/', validateToken, ownerController.updateOwner);
 
 export default ownerRouter;

@@ -30,12 +30,5 @@ export const updateUser = (req: Request, res: Response) => {
 };
 
 export const deleteUser = (req: Request, res: Response) => {
-  handleResponse(
-    'userController',
-    res,
-    userService.deleteUser({
-      headers: req.headers,
-      body: req.body,
-    })
-  );
+  handleResponse('userController', res, userService.deleteUser(req.headers));
 };

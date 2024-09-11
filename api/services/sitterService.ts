@@ -44,7 +44,6 @@ export const getSitterById = async (
   req: Request
 ): Promise<I_SitterDocument> => {
   try {
-    // const sitters = db.collection('pet-sitters');
     const { id } = req.params;
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       throw new Error('Invalid ID format');
@@ -109,14 +108,6 @@ export const deleteSitter = async (
     if (!deletedSitter) {
       throw new Error('Sitter not found');
     }
-    // Find the Sitter to delete
-    // const sitterIdFormatted = new ObjectId(sitterId);
-    // const sitter = await sitters.findOne({ _id: sitterIdFormatted });
-    // if (!sitter) {
-    //   throw new Error('Pet Sitter not found');
-    // }
-    // // Delete the Sitter from the database
-    // await sitters.deleteOne({ _id: sitterIdFormatted });
   } catch (error: any) {
     console.error('Error in deleteSitter:', error.message);
     throw new Error(error.message);

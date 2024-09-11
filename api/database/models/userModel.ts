@@ -18,7 +18,7 @@ export interface I_UserCreate extends I_User {
   city: string;
   country: string;
   tel?: string; // sitter profile
-  acceptedPets?: string[]; // sitter profile
+  acceptedPets?: ('cat' | 'dog' | 'nac')[]; // sitter profile
   presentation?: string; // sitter profile
   pets?: string[]; // owner profile
 }
@@ -31,6 +31,7 @@ export interface I_UserUpdate {
 const userSchema = new Schema<I_UserDocument>({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  role: { type: String, required: true },
   profileId: { type: Schema.Types.ObjectId, ref: 'Profile' },
 });
 

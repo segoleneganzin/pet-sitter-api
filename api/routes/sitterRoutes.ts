@@ -6,7 +6,6 @@ import { validateToken } from '../middleware/tokenValidation';
 
 const sitterRouter = Router();
 
-// Global Routes
 sitterRouter.get('/:id', sitterController.getSitterById);
 sitterRouter.get('/', sitterController.getAllSitters);
 sitterRouter.patch('/', validateToken, sitterController.updateSitter);
