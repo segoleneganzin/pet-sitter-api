@@ -1,15 +1,16 @@
 import { Response } from 'express';
 
+interface Error {
+  status?: number;
+  message?: string;
+}
+
 // Function to handle errors and send a response
 const handleError = (controller: string, res: Response, error: Error) => {
   console.error(`Something went wrong in ${controller}`, error);
-  res.status(400).send({
-    status: 400,
-    message: error.message,
-  });
-  res.status(500).send({
-    status: 500,
-    message: 'Internal Server Error',
+  res.status(error.status || 500).send({
+    status: error.status || 500,
+    message: error.message || 'Internal Server Error',
   });
 };
 

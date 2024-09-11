@@ -6,9 +6,12 @@ import { validateToken } from '../middleware/tokenValidation';
 
 const sitterRouter = Router();
 
-sitterRouter.get('/:id', sitterController.getSitterById);
-sitterRouter.get('/', sitterController.getAllSitters);
-sitterRouter.patch('/', validateToken, sitterController.updateSitter);
+sitterRouter
+  .route('/:id')
+  .get(sitterController.getSitterById)
+  .patch(validateToken, sitterController.updateSitter);
+
+sitterRouter.get('', sitterController.getAllSitters);
 
 // router.patch(
 //   '/:id/identity',

@@ -4,8 +4,11 @@ import { validateToken } from '../middleware/tokenValidation';
 
 const ownerRouter = Router();
 
-ownerRouter.get('/:id', ownerController.getOwnerById);
+ownerRouter
+  .route('/:id')
+  .get(ownerController.getOwnerById)
+  .patch(validateToken, ownerController.updateOwner);
+
 ownerRouter.get('/', ownerController.getAllOwners);
-ownerRouter.patch('/', validateToken, ownerController.updateOwner);
 
 export default ownerRouter;

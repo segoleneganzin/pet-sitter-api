@@ -1,7 +1,7 @@
 import { deleteFile } from '../utils/deleteFile';
 import { Request } from 'express';
 import mongoose from 'mongoose';
-import { profileAccess } from '../utils/profileAccess';
+import { validProfileAccess } from '../utils/validProfileAccess';
 import { IncomingHttpHeaders } from 'http';
 import {
   I_OwnerDocument,
@@ -57,18 +57,26 @@ export const getOwnerById = async (req: Request): Promise<I_OwnerDocument> => {
 export const updateOwner = async ({
   headers,
   body,
+  req,
 }: {
   headers: Headers;
   body: I_Owner;
+  req: Request;
 }): Promise<I_OwnerDocument> => {
   try {
+    const { id } = req.params;
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      throw new Error('Invalid ID format');
+    }
     if (!headers || !headers.authorization) {
       throw new Error('Authorization header is missing');
     }
-    const owner = await profileAccess(headers.authorization);
-    if (!owner) {
-      throw new Error('Owner not found');
-    }
+    const profileId = new mongoose.Types.ObjectId(id);
+    await validProfileAccess({
+      authHeader: headers.authorization,
+      profileId,
+    });
+
     const updateData: Partial<I_Owner> = {
       firstName: body.firstName,
       lastName: body.lastName,
@@ -77,7 +85,7 @@ export const updateOwner = async ({
       pets: body.pets,
     };
     const updatedOwner = await OwnerModel.findByIdAndUpdate(
-      owner._id,
+      profileId,
       { $set: updateData },
       { new: true }
     );

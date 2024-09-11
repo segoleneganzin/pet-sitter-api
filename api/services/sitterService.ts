@@ -3,7 +3,7 @@ import { Request } from 'express';
 import mongoose from 'mongoose';
 // import { ObjectId, ReturnDocument } from 'mongodb';
 // import { dbInstance as db } from '../database/connection';
-import { profileAccess } from '../utils/profileAccess';
+import { validProfileAccess } from '../utils/validProfileAccess';
 import { IncomingHttpHeaders } from 'http';
 import {
   I_SitterDocument,
@@ -62,18 +62,26 @@ export const getSitterById = async (
 export const updateSitter = async ({
   headers,
   body,
+  req,
 }: {
   headers: Headers;
   body: I_Sitter;
+  req: Request;
 }): Promise<I_SitterDocument> => {
   try {
+    const { id } = req.params;
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      throw new Error('Invalid ID format');
+    }
     if (!headers || !headers.authorization) {
       throw new Error('Authorization header is missing');
     }
-    const sitter = await profileAccess(headers.authorization);
-    if (!sitter) {
-      throw new Error('Sitter not found');
-    }
+    const profileId = new mongoose.Types.ObjectId(id);
+    await validProfileAccess({
+      authHeader: headers.authorization,
+      profileId,
+    });
+
     const updateData: Partial<I_Sitter> = {
       firstName: body.firstName,
       lastName: body.lastName,
@@ -84,7 +92,7 @@ export const updateSitter = async ({
       acceptedPets: body.acceptedPets,
     };
     const updatedSitter = await SitterModel.findByIdAndUpdate(
-      sitter._id,
+      profileId,
       { $set: updateData },
       { new: true }
     );

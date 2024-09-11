@@ -17,6 +17,7 @@ export const updateOwner = (req: Request, res: Response) => {
     ownerService.updateOwner({
       headers: req.headers,
       body: req.body,
+      req,
     })
   );
 };

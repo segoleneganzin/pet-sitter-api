@@ -143,12 +143,11 @@ export const getUserEmail = async (
   res: Response
 ): Promise<string> => {
   try {
-    // const users = db.collection('users');
-    const { id } = req.params; // sitterId or ownerId
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+    const { profileId } = req.params; // sitterId or ownerId
+    if (!profileId || !mongoose.Types.ObjectId.isValid(profileId)) {
       throw new Error('Invalid ID format');
     }
-    const user = await UserModel.findOne({ profileId: id });
+    const user = await UserModel.findOne({ profileId: profileId });
 
     if (!user) {
       throw new Error('Email not found');

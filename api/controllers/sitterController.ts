@@ -17,6 +17,7 @@ export const updateSitter = (req: Request, res: Response) => {
     sitterService.updateSitter({
       headers: req.headers,
       body: req.body,
+      req,
     })
   );
 };

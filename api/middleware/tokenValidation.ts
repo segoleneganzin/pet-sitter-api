@@ -15,13 +15,13 @@ export const validateToken = (
     // Check if the token is present in the headers
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-      throw new Error('Unauthorized');
+      throw new Error('Unauthorized: missing header');
     }
 
     // Extract the JWT token from the 'Authorization' header
     const token = authHeader.split('Bearer ')[1]?.trim();
     if (!token) {
-      throw new Error('Unauthorized');
+      throw new Error('Unauthorized: missing token');
     }
 
     // Decode and verify the JWT token
