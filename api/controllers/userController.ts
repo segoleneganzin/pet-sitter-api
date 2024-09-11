@@ -14,6 +14,10 @@ export const getUser = (req: Request, res: Response) => {
   handleResponse('userController', res, userService.getUser(req.headers));
 };
 
+export const getUserEmail = async (req: Request, res: Response) => {
+  handleResponse('sitterController', res, userService.getUserEmail(req, res));
+};
+
 export const updateUser = (req: Request, res: Response) => {
   handleResponse(
     'userController',

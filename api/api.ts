@@ -4,8 +4,9 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import path from 'path';
 import { dbConnection } from './database/connection';
-import petSittersRoutes from './routes/petSittersRoutes';
+import sittersRoutes from './routes/sitterRoutes';
 import userRoutes from './routes/userRoutes';
+import ownerRoutes from './routes/ownerRoutes';
 
 dotenv.config();
 
@@ -40,7 +41,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Handle custom routes
-app.use('/api/pet-sitters', petSittersRoutes);
+app.use('/api/sitters', sittersRoutes);
+app.use('/api/owners', ownerRoutes);
 app.use('/api/users', userRoutes);
 
 app.get('/', (req: Request, res: Response) => {

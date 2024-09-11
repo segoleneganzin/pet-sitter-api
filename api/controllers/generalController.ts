@@ -7,6 +7,10 @@ const handleError = (controller: string, res: Response, error: Error) => {
     status: 400,
     message: error.message,
   });
+  res.status(500).send({
+    status: 500,
+    message: 'Internal Server Error',
+  });
 };
 
 // Function to handle successful responses for general cases
