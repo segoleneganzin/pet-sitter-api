@@ -7,20 +7,21 @@ export interface I_User {
 
 export interface I_UserDocument extends Document, I_User {
   _id: Types.ObjectId;
-  role: string;
+  role: 'sitter' | 'owner';
   profileId: Types.ObjectId;
 }
 
 export interface I_UserCreate extends I_User {
-  role: string;
+  role: 'sitter' | 'owner';
+  profilePicture: string;
   firstName: string;
   lastName: string;
   city: string;
   country: string;
   tel?: string; // sitter profile
-  acceptedPets?: ('cat' | 'dog' | 'nac')[]; // sitter profile
+  acceptedPets?: string | string[]; // sitter profile
   presentation?: string; // sitter profile
-  pets?: string[]; // owner profile
+  pets?: string | string[]; // owner profile
 }
 
 export interface I_UserUpdate {

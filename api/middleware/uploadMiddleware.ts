@@ -7,19 +7,9 @@ const fileFilter = (
   file: Express.Multer.File,
   cb: FileFilterCallback
 ) => {
-  let allowedTypes;
-  let errorMessage = '';
-  switch (file.fieldname) {
-    case 'avatar':
-      allowedTypes = /jpeg|jpg|png/;
-      errorMessage =
-        'Invalid file type. Only JPG, JPEG, and PNG files are allowed.';
-      break;
-    default:
-      allowedTypes = /jpeg|jpg|png/;
-      errorMessage = 'Invalid file type.';
-      break;
-  }
+  const allowedTypes = /jpeg|jpg|png/;
+  const errorMessage =
+    'Invalid file type. Only JPG, JPEG, and PNG files are allowed.';
   const extname = allowedTypes.test(
     path.extname(file.originalname).toLowerCase()
   );

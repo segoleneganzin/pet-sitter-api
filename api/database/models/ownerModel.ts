@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export interface I_Owner {
+  profilePicture: String;
   firstName: string;
   lastName: string;
   city: string;
@@ -13,6 +14,7 @@ export interface I_OwnerDocument extends Document, I_Owner {
 }
 
 const ownerSchema = new Schema<I_OwnerDocument>({
+  profilePicture: { type: String, required: false },
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   city: { type: String, required: true },

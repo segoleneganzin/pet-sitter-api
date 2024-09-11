@@ -11,7 +11,6 @@ import { IncomingHttpHeaders } from 'http';
 import {
   I_UserDocument,
   I_User,
-  I_UserCreate,
   I_UserUpdate,
   UserModel,
 } from '../database/models/userModel';
@@ -46,66 +45,44 @@ export const loginUser = async (
   }
 };
 
-// Service to create a new user
-export const createUser = async (
-  serviceData: I_UserCreate
-): Promise<I_UserDocument> => {
+// Service to create a new user with formData
+export const createUser = async (req: Request): Promise<I_UserDocument> => {
   try {
-    const {
-      email,
-      password,
-      role,
-      firstName,
-      lastName,
-      city,
-      country,
-      tel = '',
-      acceptedPets = [],
-      presentation = '',
-      pets = [],
-    } = serviceData;
+    const { body, file } = req;
+
+    if (file) {
+      body.profilePicture = `/${file.filename}`;
+    } else {
+      body.profilePicture = '/default-profile-picture.png';
+    }
+
     // Check if email already exists
-    const existingEmail = await UserModel.findOne({ email });
+    const existingEmail = await UserModel.findOne({ email: body.email });
     if (existingEmail) {
       throw new Error('Email already exists');
     }
-    if (!password) {
+    if (!body.password) {
       throw new Error('Password is required');
     }
     let newProfile = null;
-    if (role === 'sitter') {
-      newProfile = await sitterService.createSitter({
-        firstName,
-        lastName,
-        tel,
-        city,
-        country,
-        acceptedPets,
-        presentation,
-      });
+    if (body.role === 'sitter') {
+      newProfile = await sitterService.createSitter(body);
     }
-    if (role === 'owner') {
-      newProfile = await ownerService.createOwner({
-        firstName,
-        lastName,
-        city,
-        country,
-        pets,
-      });
+    if (body.role === 'owner') {
+      newProfile = await ownerService.createOwner(body);
     }
-
     if (!newProfile) {
       throw new Error('Profile creation failed');
     }
 
     // Hash the password
-    const hashPassword = await bcrypt.hash(password, 12);
+    const hashPassword = await bcrypt.hash(body.password, 12);
 
     // Create and save the new User
     const newUser = new UserModel({
-      email,
+      email: body.email,
       password: hashPassword,
-      role,
+      role: body.role,
       profileId: newProfile._id,
     });
 

@@ -8,6 +8,7 @@ import {
   I_Owner,
   OwnerModel,
 } from '../database/models/ownerModel';
+import { I_UserCreate } from '../database/models/userModel';
 
 interface Headers extends IncomingHttpHeaders {
   authorization?: string;
@@ -15,9 +16,14 @@ interface Headers extends IncomingHttpHeaders {
 
 // Service to create a new Sitter
 export const createOwner = async (
-  serviceData: I_Owner
+  serviceData: I_UserCreate
 ): Promise<I_OwnerDocument> => {
   try {
+    if (typeof serviceData.pets === 'string') {
+      serviceData.pets = serviceData.pets
+        .split(',')
+        .map((pet: string) => pet.trim());
+    }
     const newOwner = new OwnerModel(serviceData);
     await newOwner.save();
     return newOwner;
@@ -36,7 +42,7 @@ export const getAllOwners = async (): Promise<I_OwnerDocument[]> => {
     throw new Error('Failed to retrieve owners. Please try again later.');
   }
 };
-// Service to get a owner by id
+
 export const getOwnerById = async (req: Request): Promise<I_OwnerDocument> => {
   try {
     const { id } = req.params;
@@ -54,17 +60,10 @@ export const getOwnerById = async (req: Request): Promise<I_OwnerDocument> => {
   }
 };
 
-export const updateOwner = async ({
-  headers,
-  body,
-  req,
-}: {
-  headers: Headers;
-  body: I_Owner;
-  req: Request;
-}): Promise<I_OwnerDocument> => {
+export const updateOwner = async (req: Request): Promise<I_OwnerDocument> => {
   try {
-    const { id } = req.params;
+    const { headers, body, file, params } = req;
+    const { id } = params;
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       throw new Error('Invalid ID format');
     }
@@ -76,8 +75,24 @@ export const updateOwner = async ({
       authHeader: headers.authorization,
       profileId,
     });
+    const owner = await OwnerModel.findById(id);
+    if (!owner) {
+      throw new Error('Owner not found');
+    }
+    if (file) {
+      const oldImagePath = `./public/uploads/profilePicture${owner.profilePicture}`;
+      deleteFile(oldImagePath);
+      body.profilePicture = `/${file.filename}`;
+    } else {
+      body.profilePicture = owner.profilePicture;
+    }
+    if (typeof body.pets === 'string') {
+      body.pets = body.pets.split(',');
+    }
+    console.log(body.pets);
 
     const updateData: Partial<I_Owner> = {
+      profilePicture: body.profilePicture,
       firstName: body.firstName,
       lastName: body.lastName,
       city: body.city,
@@ -105,6 +120,13 @@ export const deleteOwner = async (
   ownerId: mongoose.Types.ObjectId
 ): Promise<void> => {
   try {
+    const owner = await OwnerModel.findById(ownerId);
+    if (!owner) {
+      throw new Error('Owner not found');
+    }
+    const profilePicture = `./public/uploads/profilePicture${owner.profilePicture}`;
+    deleteFile(profilePicture);
+
     const deletedOwner = await OwnerModel.findByIdAndDelete(ownerId);
     if (!deletedOwner) {
       throw new Error('Owner not found');

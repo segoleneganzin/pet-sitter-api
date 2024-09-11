@@ -3,9 +3,23 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const signupApi = 'http://localhost:3000/api/users/register';
+interface User {
+  email: string;
+  password: string;
+  role: 'sitter' | 'owner';
+  firstName: string;
+  lastName: string;
+  city: string;
+  country: string;
+  tel?: string;
+  presentation?: string;
+  acceptedPets?: string;
+  pets?: string;
+}
 
-const users = [
+const signupApi = 'http://localhost:3000/api/v1/users';
+
+const users: User[] = [
   {
     email: 'sophie@test.com',
     password: 'test123',
@@ -16,7 +30,7 @@ const users = [
     country: 'France',
     tel: '0851689255',
     presentation: 'Lorem Ipsum',
-    acceptedPets: ['cat', 'dog'],
+    acceptedPets: 'dog, cat',
   },
   {
     email: 'marie@test.com',
@@ -28,7 +42,7 @@ const users = [
     country: 'France',
     tel: '0851689255',
     presentation: 'Lorem Ipsum',
-    acceptedPets: ['cat', 'dog', 'nac'],
+    acceptedPets: 'dog, cat',
   },
   {
     email: 'jean@test.com',
@@ -40,23 +54,35 @@ const users = [
     country: 'France',
     tel: '0851689255',
     presentation: 'Lorem Ipsum',
-    acceptedPets: ['dog'],
+    acceptedPets: 'dog, cat',
   },
   {
-    email: 'luci@test.com',
+    email: 'lucie@test.com',
     password: 'test123',
     role: 'owner',
     firstName: 'Lucie',
     lastName: 'Bernard',
     city: 'Marseille',
     country: 'France',
-    pets: ['dog', 'cat'],
+    pets: 'dog, cat',
   },
 ];
 
-users.forEach((user) => {
+users.forEach((user: User) => {
+  const formData = new FormData();
+  Object.keys(user).forEach((key) => {
+    const value = user[key as keyof User];
+    if (value !== undefined) {
+      if (Array.isArray(value)) {
+        formData.append(key, JSON.stringify(value));
+      } else {
+        formData.append(key, value);
+      }
+    }
+  });
+
   axios
-    .post(signupApi, user)
+    .post(signupApi, formData)
     .then((response) => console.log(response.data))
-    .catch((error) => console.error(error.response.data));
+    .catch((error) => console.error(error.response?.data || error.message));
 });

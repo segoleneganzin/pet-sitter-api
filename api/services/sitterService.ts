@@ -10,6 +10,7 @@ import {
   I_Sitter,
   SitterModel,
 } from '../database/models/sitterModel';
+import { I_UserCreate } from '../database/models/userModel';
 
 interface Headers extends IncomingHttpHeaders {
   authorization?: string;
@@ -17,10 +18,14 @@ interface Headers extends IncomingHttpHeaders {
 
 // Service to create a new Sitter
 export const createSitter = async (
-  serviceData: I_Sitter
+  serviceData: I_UserCreate
 ): Promise<I_SitterDocument> => {
   try {
-    // const sitters = db.collection('pet-sitters');
+    if (typeof serviceData.acceptedPets === 'string') {
+      serviceData.acceptedPets = serviceData.acceptedPets
+        .split(',')
+        .map((pet: string) => pet.trim());
+    }
     const newSitter = new SitterModel(serviceData);
     await newSitter.save();
     return newSitter;
@@ -59,17 +64,10 @@ export const getSitterById = async (
   }
 };
 
-export const updateSitter = async ({
-  headers,
-  body,
-  req,
-}: {
-  headers: Headers;
-  body: I_Sitter;
-  req: Request;
-}): Promise<I_SitterDocument> => {
+export const updateSitter = async (req: Request): Promise<I_SitterDocument> => {
   try {
-    const { id } = req.params;
+    const { headers, body, file, params } = req;
+    const { id } = params;
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       throw new Error('Invalid ID format');
     }
@@ -81,8 +79,24 @@ export const updateSitter = async ({
       authHeader: headers.authorization,
       profileId,
     });
-
+    const sitter = await SitterModel.findById(id);
+    if (!sitter) {
+      throw new Error('Sitter not found');
+    }
+    if (file) {
+      const oldImagePath = `./public/uploads/profilePicture${sitter.profilePicture}`;
+      deleteFile(oldImagePath);
+      body.profilePicture = `/${file.filename}`;
+    } else {
+      body.profilePicture = sitter.profilePicture;
+    }
+    if (typeof body.acceptedPets === 'string') {
+      body.acceptedPets = body.acceptedPets
+        .split(',')
+        .map((pet: string) => pet.trim());
+    }
     const updateData: Partial<I_Sitter> = {
+      profilePicture: body.profilePicture,
       firstName: body.firstName,
       lastName: body.lastName,
       tel: body.tel,
@@ -91,6 +105,7 @@ export const updateSitter = async ({
       presentation: body.presentation,
       acceptedPets: body.acceptedPets,
     };
+
     const updatedSitter = await SitterModel.findByIdAndUpdate(
       profileId,
       { $set: updateData },
@@ -112,6 +127,14 @@ export const deleteSitter = async (
   sitterId: mongoose.Types.ObjectId
 ): Promise<void> => {
   try {
+    const sitter = await SitterModel.findById(sitterId);
+    if (!sitter) {
+      throw new Error('Sitter not found');
+    }
+    console.log(sitter);
+
+    const profilePicture = `./public/uploads/profilePicture${sitter.profilePicture}`;
+    deleteFile(profilePicture);
     const deletedSitter = await SitterModel.findByIdAndDelete(sitterId);
     if (!deletedSitter) {
       throw new Error('Sitter not found');

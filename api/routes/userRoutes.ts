@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as userController from '../controllers/userController';
 import { validateToken } from '../middleware/tokenValidation';
+import { upload, handleError } from '../middleware/uploadMiddleware';
 
 const userRouter = Router();
 
@@ -13,7 +14,7 @@ userRouter.get('/:profileId/email', userController.getUserEmail);
 
 userRouter
   .route('')
-  .post(userController.createUser)
+  .post(upload.single('profilePicture'), userController.createUser, handleError)
   .get(validateToken, userController.getUser) // user id is in token
   .patch(validateToken, userController.updateUser)
   .delete(validateToken, userController.deleteUser);

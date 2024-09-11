@@ -3,10 +3,9 @@ import fs from 'fs';
 export const deleteFile = (filePath: string): void => {
   try {
     // not delete default files
-    const defaultAvatarPath = './public/uploads/avatar//default-avatar.png';
-    const defaultThumbnailPath =
-      './public/uploads/projectImg//default-thumbnail.png';
-    if (filePath !== defaultAvatarPath && filePath !== defaultThumbnailPath) {
+    const defaultProfilePicturePath =
+      './public/uploads/profilePicture/default-profile-picture.png';
+    if (filePath !== defaultProfilePicturePath) {
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       } else {

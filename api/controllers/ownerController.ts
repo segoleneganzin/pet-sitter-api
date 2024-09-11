@@ -11,13 +11,5 @@ export const getOwnerById = async (req: Request, res: Response) => {
 };
 
 export const updateOwner = (req: Request, res: Response) => {
-  handleResponse(
-    'ownerController',
-    res,
-    ownerService.updateOwner({
-      headers: req.headers,
-      body: req.body,
-      req,
-    })
-  );
+  handleResponse('ownerController', res, ownerService.updateOwner(req));
 };

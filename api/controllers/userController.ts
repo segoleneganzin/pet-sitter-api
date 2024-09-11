@@ -7,7 +7,7 @@ export const loginUser = async (req: Request, res: Response) => {
 };
 
 export const createUser = (req: Request, res: Response) => {
-  handleResponseCreate('userController', res, userService.createUser(req.body));
+  handleResponseCreate('userController', res, userService.createUser(req));
 };
 
 export const getUser = (req: Request, res: Response) => {

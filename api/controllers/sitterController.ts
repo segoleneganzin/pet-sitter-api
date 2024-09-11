@@ -11,13 +11,5 @@ export const getSitterById = async (req: Request, res: Response) => {
 };
 
 export const updateSitter = (req: Request, res: Response) => {
-  handleResponse(
-    'sitterController',
-    res,
-    sitterService.updateSitter({
-      headers: req.headers,
-      body: req.body,
-      req,
-    })
-  );
+  handleResponse('sitterController', res, sitterService.updateSitter(req));
 };
