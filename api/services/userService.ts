@@ -2,12 +2,11 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
 import mongoose from 'mongoose';
-// import { ObjectId, ReturnDocument } from 'mongodb';
-// import { dbInstance as db } from '../database/connection';
 import { decodedJwtToken } from '../utils/decodedJwtToken';
 import * as sitterService from './sitterService';
 import * as ownerService from './ownerService';
 import { IncomingHttpHeaders } from 'http';
+import { CustomError } from '../utils/customError';
 import {
   I_UserDocument,
   I_User,
@@ -25,16 +24,14 @@ export const loginUser = async (
   try {
     const user = await UserModel.findOne({ email: serviceData.email });
     if (!user) {
-      throw new Error('User not found!');
+      throw new CustomError(404, 'User not found!');
     }
-
     const isValid = await bcrypt.compare(serviceData.password, user.password);
     if (!isValid) {
-      throw new Error('Invalid combination');
+      throw new CustomError(401, 'Invalid username/password supplied');
     }
-
     const token = jwt.sign(
-      { id: user._id.toString() },
+      { id: user.id.toString() },
       process.env.SECRET_KEY || 'default-secret-key',
       { expiresIn: '1d' }
     );
@@ -59,10 +56,10 @@ export const createUser = async (req: Request): Promise<I_UserDocument> => {
     // Check if email already exists
     const existingEmail = await UserModel.findOne({ email: body.email });
     if (existingEmail) {
-      throw new Error('Email already exists');
+      throw new CustomError(409, 'Email already exists');
     }
     if (!body.password) {
-      throw new Error('Password is required');
+      throw new CustomError(400, 'Password is required');
     }
     let newProfile = null;
     if (body.role === 'sitter') {
@@ -72,9 +69,8 @@ export const createUser = async (req: Request): Promise<I_UserDocument> => {
       newProfile = await ownerService.createOwner(body);
     }
     if (!newProfile) {
-      throw new Error('Profile creation failed');
+      throw new CustomError(500, 'Profile creation failed');
     }
-
     // Hash the password
     const hashPassword = await bcrypt.hash(body.password, 12);
 
@@ -83,14 +79,14 @@ export const createUser = async (req: Request): Promise<I_UserDocument> => {
       email: body.email,
       password: hashPassword,
       role: body.role,
-      profileId: newProfile._id,
+      profileId: newProfile.id,
     });
 
     await newUser.save();
     return newUser;
   } catch (error: any) {
     console.error('Error in createUser:', error.message);
-    throw new Error(error.message);
+    throw error;
   }
 };
 
@@ -98,20 +94,20 @@ export const createUser = async (req: Request): Promise<I_UserDocument> => {
 export const getUser = async (headers: Headers): Promise<I_UserDocument> => {
   try {
     if (!headers.authorization) {
-      throw new Error('Authorization header is missing');
+      throw new CustomError(401, 'Authorization header is missing');
     }
 
     const decodedJwt = await decodedJwtToken(headers.authorization);
 
     const user = await UserModel.findById(decodedJwt.id);
     if (!user) {
-      throw new Error('User not found!');
+      throw new CustomError(404, 'User not found!');
     }
 
     return user;
   } catch (error: any) {
     console.error('Error in getUser:', error);
-    throw new Error(error);
+    throw error;
   }
 };
 
@@ -122,17 +118,17 @@ export const getUserEmail = async (
   try {
     const { profileId } = req.params; // sitterId or ownerId
     if (!profileId || !mongoose.Types.ObjectId.isValid(profileId)) {
-      throw new Error('Invalid ID format');
+      throw new CustomError(400, 'Invalid ID format');
     }
     const user = await UserModel.findOne({ profileId: profileId });
 
     if (!user) {
-      throw new Error('Email not found');
+      throw new CustomError(404, 'Email not found');
     }
     return user.email;
   } catch (error: any) {
     console.error('Error in getEmail:', error.message);
-    throw new Error(error.message);
+    throw error;
   }
 };
 
@@ -146,7 +142,7 @@ export const updateUser = async ({
 }): Promise<I_UserDocument> => {
   try {
     if (!headers.authorization) {
-      throw new Error('Authorization header is missing');
+      throw new CustomError(401, 'Authorization header is missing');
     }
 
     const decodedJwt = await decodedJwtToken(headers.authorization);
@@ -156,7 +152,7 @@ export const updateUser = async ({
     if (body.email) {
       const existingEmail = await UserModel.findOne({ email: body.email });
       if (existingEmail) {
-        throw new Error('Email already exists');
+        throw new CustomError(409, 'Email already exists');
       }
       updateData.email = body.email;
     }
@@ -174,13 +170,13 @@ export const updateUser = async ({
     );
 
     if (!updatedUser) {
-      throw new Error('User not found');
+      throw new CustomError(404, 'User not found!');
     }
 
     return updatedUser;
   } catch (error: any) {
     console.error('Error in updateUser:', error.message);
-    throw new Error(error.message);
+    throw error;
   }
 };
 
@@ -188,13 +184,13 @@ export const updateUser = async ({
 export const deleteUser = async (headers: Headers): Promise<void> => {
   try {
     if (!headers.authorization) {
-      throw new Error('Authorization header is missing');
+      throw new CustomError(401, 'Authorization header is missing');
     }
     const decodedJwt = await decodedJwtToken(headers.authorization);
     const user = await UserModel.findById(decodedJwt.id);
 
     if (!user) {
-      throw new Error('User not found');
+      throw new CustomError(404, 'User not found');
     }
     if (user.role === 'sitter') {
       await sitterService.deleteSitter(user.profileId);
@@ -202,9 +198,9 @@ export const deleteUser = async (headers: Headers): Promise<void> => {
     if (user.role === 'owner') {
       await ownerService.deleteOwner(user.profileId);
     }
-    await UserModel.findByIdAndDelete(user._id);
+    await UserModel.findByIdAndDelete(user.id);
   } catch (error: any) {
     console.error('Error in deleteUser:', error.message);
-    throw new Error(error.message);
+    throw error;
   }
 };

@@ -1,20 +1,14 @@
 import { deleteFile } from '../utils/deleteFile';
 import { Request } from 'express';
 import mongoose from 'mongoose';
-// import { ObjectId, ReturnDocument } from 'mongodb';
-// import { dbInstance as db } from '../database/connection';
 import { validProfileAccess } from '../utils/validProfileAccess';
-import { IncomingHttpHeaders } from 'http';
+import { CustomError } from '../utils/customError';
 import {
   I_SitterDocument,
   I_Sitter,
   SitterModel,
 } from '../database/models/sitterModel';
 import { I_UserCreate } from '../database/models/userModel';
-
-interface Headers extends IncomingHttpHeaders {
-  authorization?: string;
-}
 
 // Service to create a new Sitter
 export const createSitter = async (
@@ -31,7 +25,7 @@ export const createSitter = async (
     return newSitter;
   } catch (error: any) {
     console.error('Error in createSitter:', error.message);
-    throw new Error(error.message);
+    throw new CustomError(500, 'Sitter creation failed');
   }
 };
 
@@ -41,7 +35,10 @@ export const getAllSitters = async (): Promise<I_SitterDocument[]> => {
     return sittersList;
   } catch (error: any) {
     console.error('Error in getAllSitters:', error.message);
-    throw new Error('Failed to retrieve Sitters. Please try again later.');
+    throw new CustomError(
+      500,
+      'Failed to retrieve Sitters. Please try again later.'
+    );
   }
 };
 // Service to get a Sitter by id
@@ -51,16 +48,16 @@ export const getSitterById = async (
   try {
     const { id } = req.params;
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-      throw new Error('Invalid ID format');
+      throw new CustomError(400, 'Invalid ID format');
     }
     const sitter = await SitterModel.findById(id);
     if (!sitter) {
-      throw new Error('Sitter not found');
+      throw new CustomError(404, 'Sitter not found!');
     }
     return sitter;
   } catch (error: any) {
     console.error('Error in getSitterById:', error.message);
-    throw new Error(error.message);
+    throw error;
   }
 };
 
@@ -69,10 +66,10 @@ export const updateSitter = async (req: Request): Promise<I_SitterDocument> => {
     const { headers, body, file, params } = req;
     const { id } = params;
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-      throw new Error('Invalid ID format');
+      throw new CustomError(400, 'Invalid ID format');
     }
     if (!headers || !headers.authorization) {
-      throw new Error('Authorization header is missing');
+      throw new CustomError(401, 'Authorization header is missing');
     }
     const profileId = new mongoose.Types.ObjectId(id);
     await validProfileAccess({
@@ -81,7 +78,7 @@ export const updateSitter = async (req: Request): Promise<I_SitterDocument> => {
     });
     const sitter = await SitterModel.findById(id);
     if (!sitter) {
-      throw new Error('Sitter not found');
+      throw new CustomError(404, 'Sitter not found!');
     }
     if (file) {
       const oldImagePath = `./public/uploads/profilePicture${sitter.profilePicture}`;
@@ -113,13 +110,13 @@ export const updateSitter = async (req: Request): Promise<I_SitterDocument> => {
     );
 
     if (!updatedSitter) {
-      throw new Error('Sitter not found');
+      throw new CustomError(404, 'Sitter not found');
     }
 
     return updatedSitter;
   } catch (error: any) {
     console.error('Error in updateSitter:', error.message);
-    throw new Error(error.message);
+    throw error;
   }
 };
 
@@ -129,18 +126,16 @@ export const deleteSitter = async (
   try {
     const sitter = await SitterModel.findById(sitterId);
     if (!sitter) {
-      throw new Error('Sitter not found');
+      throw new CustomError(404, 'Sitter not found!');
     }
-    console.log(sitter);
-
     const profilePicture = `./public/uploads/profilePicture${sitter.profilePicture}`;
     deleteFile(profilePicture);
     const deletedSitter = await SitterModel.findByIdAndDelete(sitterId);
     if (!deletedSitter) {
-      throw new Error('Sitter not found');
+      throw new CustomError(404, 'Sitter not found');
     }
   } catch (error: any) {
     console.error('Error in deleteSitter:', error.message);
-    throw new Error(error.message);
+    throw error;
   }
 };

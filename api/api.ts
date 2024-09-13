@@ -43,7 +43,7 @@ app.use(express.urlencoded({ extended: true }));
 // Handle custom routes
 app.use('/api/v1/sitters', sittersRoutes);
 app.use('/api/v1/owners', ownerRoutes);
-app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/user', userRoutes);
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello from my Express server API!');

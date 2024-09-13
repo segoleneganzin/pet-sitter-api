@@ -10,7 +10,7 @@ export interface I_Owner {
 }
 
 export interface I_OwnerDocument extends Document, I_Owner {
-  _id: Types.ObjectId;
+  id: Types.ObjectId;
 }
 
 const ownerSchema = new Schema<I_OwnerDocument>({
@@ -20,6 +20,14 @@ const ownerSchema = new Schema<I_OwnerDocument>({
   city: { type: String, required: true },
   country: { type: String, required: true },
   pets: { type: [String], required: true },
+});
+
+ownerSchema.set('toJSON', {
+  transform: (doc, ret) => {
+    ret.id = ret._id;
+    delete ret._id;
+    delete ret.__v; // Optionally remove __v field if it's not needed
+  },
 });
 
 export const OwnerModel = mongoose.model<I_OwnerDocument>('Owner', ownerSchema);
