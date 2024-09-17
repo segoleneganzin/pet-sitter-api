@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export interface I_Sitter {
-  profilePicture: String;
+  profilePicture: string;
   firstName: string;
   lastName: string;
   tel: string;

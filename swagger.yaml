@@ -3,11 +3,12 @@ info:
   title: Pet Sitter App API Documentation - OpenAPI 3.0
   description: |-
     Contains all API endpoints propositions
+
     Database : mongoDB
+
     Some useful links:
     - [The Pet Sitter API repository](https://github.com/segoleneganzin/pet-sitter-api)
 
-  termsOfService: http://swagger.io/terms/
   contact:
     email: segolene.ganzin@gmail.com
   version: 1.0.0
@@ -16,18 +17,57 @@ servers:
   - url: http://localhost:3000/api/v1
 
 tags:
-  - name: user
+  - name: users
     description: Everything about users
-  - name: sitter
+  - name: sitters
     description: Everything about sitters
-  - name: owner
+  - name: owners
     description: Everything about owners
 
 paths:
-  /user:
+  /auth/login:
     post:
       tags:
-        - user
+        - auth
+      summary: Logs user into the system
+      description: ''
+      operationId: login
+      requestBody:
+        description: Login a user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLogin'
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthLoginResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Invalid username/password supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users:
+    post:
+      tags:
+        - users
       summary: Add a new user
       description: Add a new user (create automatically sitter or owner, depending on role)
       operationId: createUser
@@ -50,7 +90,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '409':
-          description: Email already exists         
+          description: Email already exists
           content:
             application/json:
               schema:
@@ -63,7 +103,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     get:
       tags:
-        - user
+        - users
       security:
         - Bearer: []
       summary: Get one user, by id on token
@@ -81,13 +121,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'         
+                $ref: '#/components/schemas/ErrorResponse'
     patch:
       tags:
-        - user
+        - users
       security:
         - Bearer: []
-      summary: Update user
+      summary: Update user, by id on token
       description: This can only be done by the logged-in user.
       operationId: updateUser
       requestBody:
@@ -110,7 +150,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: User not found!
+          description: User not found
           content:
             application/json:
               schema:
@@ -129,7 +169,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     delete:
       tags:
-        - user
+        - users
       security:
         - Bearer: []
       summary: Delete user
@@ -137,7 +177,7 @@ paths:
       operationId: deleteUser
       responses:
         '404':
-          description: User not found! / Sitter not found! / Owner not found!
+          description: User not found / Sitter not found / Owner not found
           content:
             application/json:
               schema:
@@ -148,35 +188,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-          
-  /user/login:
-    post:
+  /users/{profileId}:
+    parameters:
+      - name: profileId
+        in: path
+        description: user profileId
+        required: true
+        schema:
+          type: string
+    get:
       tags:
-        - user
-      summary: Logs user into the system
+        - users
+      summary: Get a user by his profileId and only return his email
       description: ''
-      operationId: loginUser
-      requestBody:
-        description: Login a user
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserLogin'
+      operationId: getUserEmail
       responses:
         '200':
-          description: Successful login
+          description: User email retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserLoginResponse'
-        '404':
-          description: User not found!
+                $ref: '#/components/schemas/UserEmailResponse'
+        '400':
+          description: Invalid ID supplied
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-        '401':
-          description: Invalid username/password supplied
+        '404':
+          description: User not found
           content:
             application/json:
               schema:
@@ -187,11 +227,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-    
   /sitters:
     get:
       tags:
-        - sitter
+        - sitters
       summary: Get all sitters
       description: Returns a list of sitters
       operationId: getAllSitters
@@ -218,7 +257,7 @@ paths:
           type: string
     get:
       tags:
-        - sitter
+        - sitters
       summary: Get one sitter by ID
       description: ''
       operationId: getSitterById
@@ -249,7 +288,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     patch:
       tags:
-        - sitter
+        - sitters
       security:
         - Bearer: []
       summary: Update sitter
@@ -286,11 +325,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-    
+
   /owners:
     get:
       tags:
-        - owner
+        - owners
       summary: Get all owners
       description: Returns a list of owners
       operationId: getAllOwners
@@ -314,7 +353,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
-          description: Internal Server Error    
+          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -329,7 +368,7 @@ paths:
           type: string
     get:
       tags:
-        - owner
+        - owners
       summary: Get one owner by ID
       description: ''
       operationId: getOwnerById
@@ -360,7 +399,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     patch:
       tags:
-        - owner
+        - owners
       security:
         - Bearer: []
       summary: Update owner
@@ -397,9 +436,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-          
+
 components:
   schemas:
+    AuthLogin:
+      properties:
+        email:
+          type: string
+          description: user email
+          example: 'user@example.com'
+        password:
+          type: string
+          description: user password
+          example: 'test123'
+    AuthLoginResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+        body:
+          type: object
+          properties:
+            token:
+              type: string
+
     UserCreate:
       type: object
       required:
@@ -414,11 +476,11 @@ components:
         email:
           type: string
           description: The user's email address
-          example: "user@example.com"
+          example: 'user@example.com'
         password:
           type: string
           description: The user's password (hashed)
-          example: "test123"
+          example: 'test123'
         role:
           type: string
           enum:
@@ -432,27 +494,27 @@ components:
         firstName:
           type: string
           description: The owner/sitter's first name
-          example: "John"
+          example: 'John'
         lastName:
           type: string
           description: The owner/sitter's last name
-          example: "Doe"
+          example: 'Doe'
         city:
           type: string
           description: The owner/sitter's city of residence
-          example: "New York"
+          example: 'New York'
         country:
           type: string
           description: The owner/sitter's country of residence
-          example: "USA"
+          example: 'USA'
         tel:
           type: string
           description: The sitter's tel
-          example: "0754845555"
+          example: '0754845555'
         presentation:
           type: string
           description: A short bio or presentation for the sitter
-          example: "I have been a pet sitter for 5 years and love animals."
+          example: 'I have been a pet sitter for 5 years and love animals.'
         acceptedPets:
           type: array
           items:
@@ -462,32 +524,42 @@ components:
               - dog
               - nac
           description: List of pets the sitter accepts
-          example: ["cat", "dog", "nac"]
+          example: ['cat', 'dog', 'nac']
         pets:
           type: array
           items:
             type: string
           description: List of pets the owner has
-          example: ["dog", "cat"]
-        
+          example: ['dog', 'cat']
+
     UserUpdate:
       type: object
       properties:
-        email:
+        status:
+          type: integer
+        message:
           type: string
-        password:
-          type: string
-          
-    UserLogin:
+        body:
+          type: object
+          properties:
+            email:
+              type: string
+            password:
+              type: string
+
+    UserEmailResponse:
+      type: object
       properties:
-        email:
+        status:
+          type: integer
+        message:
           type: string
-          description: user email
-          example: "user@example.com"
-        password:
-          type: string
-          description: user password   
-          example: "test123"
+        body:
+          type: object
+          properties:
+            email:
+              type: string
+
     UserResponse:
       type: object
       properties:
@@ -506,11 +578,6 @@ components:
               type: string
             profileId:
               type: string
-    UserLoginResponse:
-        type: object
-        properties:
-          token:
-            type: string
 
     Sitter:
       type: object
@@ -526,45 +593,45 @@ components:
         id:
           type: string
           description: The unique identifier for the sitter (MongoDB ObjectId)
-          example: "60d21b4667d0d8992e610c85"
+          example: '60d21b4667d0d8992e610c85'
         profilePicture:
           type: string
           description: URL of the sitter's profile picture
-          example: "https://example.com/pic.jpg"
+          example: 'https://example.com/pic.jpg'
         firstName:
           type: string
           description: The sitter's first name
-          example: "John"
+          example: 'John'
         lastName:
           type: string
           description: The sitter's last name
-          example: "Doe"
+          example: 'Doe'
         tel:
           type: string
           description: The sitter's phone number
-          example: "+1-555-5555"
+          example: '+1-555-5555'
         city:
           type: string
           description: The sitter's city of residence
-          example: "New York"
+          example: 'New York'
         country:
           type: string
           description: The sitter's country of residence
-          example: "USA"
+          example: 'USA'
         presentation:
           type: string
           description: A short bio or presentation for the sitter
-          example: "I have been a pet sitter for 5 years and love animals."
+          example: 'I have been a pet sitter for 5 years and love animals.'
         acceptedPets:
           type: array
           items:
             type: string
-            enum: 
+            enum:
               - cat
               - dog
               - nac
           description: List of pets the sitter accepts
-          example: ["cat", "dog", "nac"]
+          example: ['cat', 'dog', 'nac']
 
     SitterUpdate:
       type: object
@@ -573,31 +640,31 @@ components:
           type: string
           format: uri
           description: URL of the sitter's profile picture
-          example: "https://example.com/new-pic.jpg"
+          example: 'https://example.com/new-pic.jpg'
         firstName:
           type: string
           description: The sitter's first name
-          example: "Jane"
+          example: 'Jane'
         lastName:
           type: string
           description: The sitter's last name
-          example: "Smith"
+          example: 'Smith'
         tel:
           type: string
           description: The sitter's phone number
-          example: "+1-555-1234"
+          example: '+1-555-1234'
         city:
           type: string
           description: The sitter's city of residence
-          example: "Los Angeles"
+          example: 'Los Angeles'
         country:
           type: string
           description: The sitter's country of residence
-          example: "Canada"
+          example: 'Canada'
         presentation:
           type: string
           description: A new bio or presentation for the sitter
-          example: "I have been a professional sitter for 7 years."
+          example: 'I have been a professional sitter for 7 years.'
         acceptedPets:
           type: array
           items:
@@ -607,8 +674,8 @@ components:
               - dog
               - nac
           description: List of pets the sitter now accepts
-          example: ["cat"]
-          
+          example: ['cat']
+
     SittersResponse:
       type: object
       properties:
@@ -620,7 +687,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Sitter'
-            
+
     SitterResponse:
       type: object
       properties:
@@ -637,31 +704,31 @@ components:
             profilePicture:
               type: string
               description: URL of the sitter's profile picture
-              example: "https://example.com/new-pic.jpg"
+              example: 'https://example.com/new-pic.jpg'
             firstName:
               type: string
               description: The sitter's first name
-              example: "Jane"
+              example: 'Jane'
             lastName:
               type: string
               description: The sitter's last name
-              example: "Smith"
+              example: 'Smith'
             tel:
               type: string
               description: The sitter's phone number
-              example: "+1-555-1234"
+              example: '+1-555-1234'
             city:
               type: string
               description: The sitter's city of residence
-              example: "Los Angeles"
+              example: 'Los Angeles'
             country:
               type: string
               description: The sitter's country of residence
-              example: "Canada"
+              example: 'Canada'
             presentation:
               type: string
               description: A new bio or presentation for the sitter
-              example: "I have been a professional sitter for 7 years."
+              example: 'I have been a professional sitter for 7 years.'
             acceptedPets:
               type: array
               items:
@@ -671,7 +738,7 @@ components:
                   - dog
                   - nac
               description: List of pets the sitter now accepts
-              example: ["cat"]
+              example: ['cat']
 
     Owner:
       type: object
@@ -685,33 +752,33 @@ components:
         id:
           type: string
           description: The unique identifier for the owner (MongoDB ObjectId)
-          example: "60d21b4667d0d8992e610c85"
+          example: '60d21b4667d0d8992e610c85'
         profilePicture:
           type: string
           description: URL of the owner's profile picture
-          example: "https://example.com/pic.jpg"
+          example: 'https://example.com/pic.jpg'
         firstName:
           type: string
           description: The owner's first name
-          example: "John"
+          example: 'John'
         lastName:
           type: string
           description: The owner's last name
-          example: "Doe"
+          example: 'Doe'
         city:
           type: string
           description: The owner's city of residence
-          example: "New York"
+          example: 'New York'
         country:
           type: string
           description: The owner's country of residence
-          example: "USA"
+          example: 'USA'
         pets:
           type: array
           items:
             type: string
           description: List of pets the owner has
-          example: ["dog", "cat"]
+          example: ['dog', 'cat']
 
     OwnerUpdate:
       type: object
@@ -720,30 +787,30 @@ components:
           type: string
           format: uri
           description: URL of the owner's new profile picture
-          example: "https://example.com/new-pic.jpg"
+          example: 'https://example.com/new-pic.jpg'
         firstName:
           type: string
           description: The owner's new first name
-          example: "Jane"
+          example: 'Jane'
         lastName:
           type: string
           description: The owner's new last name
-          example: "Smith"
+          example: 'Smith'
         city:
           type: string
           description: The owner's new city of residence
-          example: "Los Angeles"
+          example: 'Los Angeles'
         country:
           type: string
           description: The owner's new country of residence
-          example: "Canada"
+          example: 'Canada'
         pets:
           type: array
           items:
             type: string
           description: List of pets the owner now has
-          example: ["dog"]
-          
+          example: ['dog']
+
     OwnersResponse:
       type: object
       properties:
@@ -755,7 +822,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Owner'
-            
+
     OwnerResponse:
       type: object
       properties:
@@ -772,30 +839,30 @@ components:
             profilePicture:
               type: string
               description: URL of the owner's new profile picture
-              example: "https://example.com/new-pic.jpg"
+              example: 'https://example.com/new-pic.jpg'
             firstName:
               type: string
               description: The owner's new first name
-              example: "Jane"
+              example: 'Jane'
             lastName:
               type: string
               description: The owner's new last name
-              example: "Smith"
+              example: 'Smith'
             city:
               type: string
               description: The owner's new city of residence
-              example: "Los Angeles"
+              example: 'Los Angeles'
             country:
               type: string
               description: The owner's new country of residence
-              example: "Canada"
+              example: 'Canada'
             pets:
               type: array
               items:
                 type: string
               description: List of pets the owner now has
-              example: ["dog"]
-              
+              example: ['dog']
+
     ErrorResponse:
       type: object
       properties:
@@ -804,7 +871,7 @@ components:
           example: 400
         message:
           type: string
-          example: "Resource not found"
+          example: 'Resource not found'
 
   securitySchemes:
     Bearer:

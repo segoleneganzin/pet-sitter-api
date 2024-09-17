@@ -48,11 +48,11 @@ export const getSitterById = async (
   try {
     const { id } = req.params;
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-      throw new CustomError(400, 'Invalid ID format');
+      throw new CustomError(400, 'Invalid ID supplied');
     }
     const sitter = await SitterModel.findById(id);
     if (!sitter) {
-      throw new CustomError(404, 'Sitter not found!');
+      throw new CustomError(404, 'Sitter not found');
     }
     return sitter;
   } catch (error: any) {
@@ -66,7 +66,7 @@ export const updateSitter = async (req: Request): Promise<I_SitterDocument> => {
     const { headers, body, file, params } = req;
     const { id } = params;
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-      throw new CustomError(400, 'Invalid ID format');
+      throw new CustomError(400, 'Invalid ID supplied');
     }
     if (!headers || !headers.authorization) {
       throw new CustomError(401, 'Authorization header is missing');
@@ -78,7 +78,7 @@ export const updateSitter = async (req: Request): Promise<I_SitterDocument> => {
     });
     const sitter = await SitterModel.findById(id);
     if (!sitter) {
-      throw new CustomError(404, 'Sitter not found!');
+      throw new CustomError(404, 'Sitter not found');
     }
     if (file) {
       const oldImagePath = `./public/uploads/profilePicture${sitter.profilePicture}`;
@@ -126,7 +126,7 @@ export const deleteSitter = async (
   try {
     const sitter = await SitterModel.findById(sitterId);
     if (!sitter) {
-      throw new CustomError(404, 'Sitter not found!');
+      throw new CustomError(404, 'Sitter not found');
     }
     const profilePicture = `./public/uploads/profilePicture${sitter.profilePicture}`;
     deleteFile(profilePicture);

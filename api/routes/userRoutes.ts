@@ -5,12 +5,9 @@ import { upload, handleError } from '../middleware/uploadMiddleware';
 
 const userRouter = Router();
 
-// Route to login a user
-userRouter.post('/login', userController.loginUser);
-
 // Route to get user email by profileId
 // ownerId or sitterId (correspond to user profileId)
-userRouter.get('/:profileId/email', userController.getUserEmail);
+userRouter.get('/:profileId', userController.getUserEmail);
 
 userRouter
   .route('')

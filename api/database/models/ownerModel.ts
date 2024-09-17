@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export interface I_Owner {
-  profilePicture: String;
+  profilePicture: string;
   firstName: string;
   lastName: string;
   city: string;

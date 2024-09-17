@@ -1,4 +1,3 @@
-// import { MongoClient, Db } from 'mongodb';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 

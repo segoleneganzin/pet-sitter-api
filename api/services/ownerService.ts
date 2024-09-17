@@ -46,11 +46,11 @@ export const getOwnerById = async (req: Request): Promise<I_OwnerDocument> => {
   try {
     const { id } = req.params;
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-      throw new CustomError(400, 'Invalid ID format');
+      throw new CustomError(400, 'Invalid ID supplied');
     }
     const owner = await OwnerModel.findById(id);
     if (!owner) {
-      throw new CustomError(404, 'Owner not found!');
+      throw new CustomError(404, 'Owner not found');
     }
     return owner;
   } catch (error: any) {
@@ -64,7 +64,7 @@ export const updateOwner = async (req: Request): Promise<I_OwnerDocument> => {
     const { headers, body, file, params } = req;
     const { id } = params;
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-      throw new CustomError(400, 'Invalid ID format');
+      throw new CustomError(400, 'Invalid ID supplied');
     }
     if (!headers || !headers.authorization) {
       throw new CustomError(401, 'Authorization header is missing');
@@ -76,7 +76,7 @@ export const updateOwner = async (req: Request): Promise<I_OwnerDocument> => {
     });
     const owner = await OwnerModel.findById(id);
     if (!owner) {
-      throw new CustomError(404, 'Owner not found!');
+      throw new CustomError(404, 'Owner not found');
     }
     if (file) {
       const oldImagePath = `./public/uploads/profilePicture${owner.profilePicture}`;
@@ -103,7 +103,7 @@ export const updateOwner = async (req: Request): Promise<I_OwnerDocument> => {
     );
 
     if (!updatedOwner) {
-      throw new CustomError(404, 'Owner not found!');
+      throw new CustomError(404, 'Owner not found');
     }
 
     return updatedOwner;
@@ -119,13 +119,13 @@ export const deleteOwner = async (
   try {
     const owner = await OwnerModel.findById(ownerId);
     if (!owner) {
-      throw new CustomError(404, 'Owner not found!');
+      throw new CustomError(404, 'Owner not found');
     }
     const profilePicture = `./public/uploads/profilePicture${owner.profilePicture}`;
     deleteFile(profilePicture);
     const deletedOwner = await OwnerModel.findByIdAndDelete(ownerId);
     if (!deletedOwner) {
-      throw new CustomError(404, 'Owner not found!');
+      throw new CustomError(404, 'Owner not found');
     }
   } catch (error: any) {
     console.error('Error in deleteOwner:', error.message);

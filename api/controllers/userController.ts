@@ -2,16 +2,6 @@ import { Request, Response } from 'express';
 import * as userService from '../services/userService';
 import { handleResponseCreate, handleResponse } from '../utils/utilsController';
 
-export const loginUser = async (req: Request, res: Response) => {
-  const successMessage = 'Successful login';
-  handleResponse(
-    'loginController',
-    res,
-    userService.loginUser(req.body),
-    successMessage
-  );
-};
-
 export const createUser = (req: Request, res: Response) => {
   handleResponseCreate('userController', res, userService.createUser(req));
 };
@@ -31,7 +21,7 @@ export const getUserEmail = async (req: Request, res: Response) => {
   handleResponse(
     'sitterController',
     res,
-    userService.getUserEmail(req, res),
+    userService.getUserEmail(req),
     successMessage
   );
 };

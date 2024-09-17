@@ -1,12 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import { CustomError } from '../utils/customError';
 
 export interface CustomRequest extends Request {
   token: string | JwtPayload;
 }
 
 // Middleware to validate JWT tokens
-export const validateToken = (
+export const validateToken = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -24,11 +25,10 @@ export const validateToken = (
       throw new Error('Unauthorized: missing token');
     }
 
+    const secretKey = process.env.SECRET_KEY || 'default-secret-key';
+
     // Decode and verify the JWT token
-    const decodedToken = jwt.verify(
-      token,
-      process.env.SECRET_KEY || 'default-secret-key'
-    );
+    const decodedToken = jwt.verify(token, secretKey) as JwtPayload;
 
     // Add the decoded token information to the request object
     (req as CustomRequest).token = decodedToken;

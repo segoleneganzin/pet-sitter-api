@@ -43,12 +43,7 @@ export const handleError = (
   res: Response,
   next: NextFunction
 ) => {
-  if (err instanceof multer.MulterError) {
-    res.status(400).send({
-      status: 400,
-      message: err.message,
-    });
-  } else if (err) {
+  if (err) {
     res.status(400).send({
       status: 400,
       message: err.message,

@@ -1,6 +1,5 @@
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import mongoose from 'mongoose';
 import { decodedJwtToken } from '../utils/decodedJwtToken';
 import * as sitterService from './sitterService';
@@ -17,30 +16,6 @@ import {
 interface Headers extends IncomingHttpHeaders {
   authorization?: string;
 }
-
-export const loginUser = async (
-  serviceData: I_User
-): Promise<{ token: string }> => {
-  try {
-    const user = await UserModel.findOne({ email: serviceData.email });
-    if (!user) {
-      throw new CustomError(404, 'User not found!');
-    }
-    const isValid = await bcrypt.compare(serviceData.password, user.password);
-    if (!isValid) {
-      throw new CustomError(401, 'Invalid username/password supplied');
-    }
-    const token = jwt.sign(
-      { id: user.id.toString() },
-      process.env.SECRET_KEY || 'default-secret-key',
-      { expiresIn: '1d' }
-    );
-    return { token };
-  } catch (error) {
-    console.error('Error in loginService', error);
-    throw error;
-  }
-};
 
 // Service to create a new user with formData
 export const createUser = async (req: Request): Promise<I_UserDocument> => {
@@ -101,7 +76,7 @@ export const getUser = async (headers: Headers): Promise<I_UserDocument> => {
 
     const user = await UserModel.findById(decodedJwt.id);
     if (!user) {
-      throw new CustomError(404, 'User not found!');
+      throw new CustomError(404, 'User not found');
     }
 
     return user;
@@ -111,19 +86,16 @@ export const getUser = async (headers: Headers): Promise<I_UserDocument> => {
   }
 };
 
-export const getUserEmail = async (
-  req: Request,
-  res: Response
-): Promise<string> => {
+export const getUserEmail = async (req: Request): Promise<string> => {
   try {
     const { profileId } = req.params; // sitterId or ownerId
     if (!profileId || !mongoose.Types.ObjectId.isValid(profileId)) {
-      throw new CustomError(400, 'Invalid ID format');
+      throw new CustomError(400, 'Invalid ID supplied');
     }
     const user = await UserModel.findOne({ profileId: profileId });
 
     if (!user) {
-      throw new CustomError(404, 'Email not found');
+      throw new CustomError(404, 'User not found');
     }
     return user.email;
   } catch (error: any) {
@@ -170,7 +142,7 @@ export const updateUser = async ({
     );
 
     if (!updatedUser) {
-      throw new CustomError(404, 'User not found!');
+      throw new CustomError(404, 'User not found');
     }
 
     return updatedUser;
