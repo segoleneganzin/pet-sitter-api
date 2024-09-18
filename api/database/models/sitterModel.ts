@@ -19,7 +19,7 @@ const sitterSchema = new Schema<I_SitterDocument>({
   profilePicture: { type: String, required: false },
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
-  tel: { type: String, required: true },
+  tel: { type: String, required: false },
   city: { type: String, required: true },
   country: { type: String, required: true },
   presentation: { type: String, required: true },
