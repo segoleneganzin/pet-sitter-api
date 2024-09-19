@@ -9,6 +9,7 @@ import {
   SitterModel,
 } from '../database/models/sitterModel';
 import { I_UserCreate } from '../database/models/userModel';
+import { capitalizeFirstLetter } from '../utils/formatWord';
 
 // Service to create a new Sitter
 export const createSitter = async (
@@ -20,6 +21,12 @@ export const createSitter = async (
         .split(',')
         .map((pet: string) => pet.trim());
     }
+
+    serviceData.firstName = capitalizeFirstLetter(serviceData.firstName);
+    serviceData.lastName = capitalizeFirstLetter(serviceData.lastName);
+    serviceData.city = capitalizeFirstLetter(serviceData.city);
+    serviceData.country = capitalizeFirstLetter(serviceData.country);
+
     const newSitter = new SitterModel(serviceData);
     await newSitter.save();
     return newSitter;

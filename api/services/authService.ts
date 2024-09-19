@@ -13,7 +13,7 @@ export const login = async (
     }
     const isValid = await bcrypt.compare(serviceData.password, user.password);
     if (!isValid) {
-      throw new CustomError(401, 'Invalid username/password supplied');
+      throw new CustomError(401, 'Invalid email/password supplied');
     }
     const token = jwt.sign(
       { id: user.id.toString() },

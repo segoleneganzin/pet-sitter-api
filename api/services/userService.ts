@@ -171,13 +171,10 @@ export const deleteUser = async ({
       throw new CustomError(404, 'User not found');
     }
 
-    if (body.email !== user.email) {
-      throw new CustomError(400, 'Email is invalid');
-    }
     const isValid = await bcrypt.compare(body.password, user.password);
 
-    if (!isValid) {
-      throw new CustomError(400, 'Password is invalid');
+    if (body.email !== user.email || !isValid) {
+      throw new CustomError(400, 'Invalid email/password supplied');
     }
 
     if (user.role === 'sitter') {

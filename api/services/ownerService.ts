@@ -9,6 +9,7 @@ import {
   OwnerModel,
 } from '../database/models/ownerModel';
 import { I_UserCreate } from '../database/models/userModel';
+import { capitalizeFirstLetter } from '../utils/formatWord';
 
 // Service to create a new Sitter
 export const createOwner = async (
@@ -20,6 +21,12 @@ export const createOwner = async (
         .split(',')
         .map((pet: string) => pet.trim());
     }
+
+    serviceData.firstName = capitalizeFirstLetter(serviceData.firstName);
+    serviceData.lastName = capitalizeFirstLetter(serviceData.lastName);
+    serviceData.city = capitalizeFirstLetter(serviceData.city);
+    serviceData.country = capitalizeFirstLetter(serviceData.country);
+
     const newOwner = new OwnerModel(serviceData);
     await newOwner.save();
     return newOwner;
