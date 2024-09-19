@@ -175,6 +175,12 @@ paths:
       summary: Delete user
       description: This can only be done by the logged-in user. It deletes the profile at the same time (owner or sitter) and profilePicture in db.
       operationId: deleteUser
+      requestBody:
+        description: Delete a user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLogin'
       responses:
         '404':
           description: User not found / Sitter not found / Owner not found

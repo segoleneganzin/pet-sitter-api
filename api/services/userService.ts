@@ -153,7 +153,13 @@ export const updateUser = async ({
 };
 
 // Service to delete user
-export const deleteUser = async (headers: Headers): Promise<void> => {
+export const deleteUser = async ({
+  headers,
+  body,
+}: {
+  headers: Headers;
+  body: I_User;
+}): Promise<void> => {
   try {
     if (!headers.authorization) {
       throw new CustomError(401, 'Authorization header is missing');
@@ -164,6 +170,16 @@ export const deleteUser = async (headers: Headers): Promise<void> => {
     if (!user) {
       throw new CustomError(404, 'User not found');
     }
+
+    if (body.email !== user.email) {
+      throw new CustomError(400, 'Email is invalid');
+    }
+    const isValid = await bcrypt.compare(body.password, user.password);
+
+    if (!isValid) {
+      throw new CustomError(400, 'Password is invalid');
+    }
+
     if (user.role === 'sitter') {
       await sitterService.deleteSitter(user.profileId);
     }

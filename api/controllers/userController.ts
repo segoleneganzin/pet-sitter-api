@@ -44,7 +44,10 @@ export const deleteUser = (req: Request, res: Response) => {
   handleResponse(
     'userController',
     res,
-    userService.deleteUser(req.headers),
+    userService.deleteUser({
+      headers: req.headers,
+      body: req.body,
+    }),
     successMessage
   );
 };
