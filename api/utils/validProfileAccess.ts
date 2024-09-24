@@ -1,4 +1,3 @@
-import { decodedJwtToken } from './decodedJwtToken';
 import mongoose from 'mongoose';
 import { UserModel } from '../database/models/userModel';
 import { CustomError } from './customError';

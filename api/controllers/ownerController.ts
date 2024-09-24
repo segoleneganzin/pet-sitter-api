@@ -22,6 +22,16 @@ export const getOwnerById = async (req: Request, res: Response) => {
   );
 };
 
+export const getOwnerByUserId = async (req: Request, res: Response) => {
+  const successMessage = 'Owner retrieved successfully';
+  handleResponse(
+    'ownerController',
+    res,
+    ownerService.getOwnerByUserId(req),
+    successMessage
+  );
+};
+
 export const updateOwner = (req: Request, res: Response) => {
   const successMessage = 'Owner updated successfully';
   handleResponse(

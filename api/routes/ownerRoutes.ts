@@ -5,6 +5,8 @@ import { upload, handleError } from '../middleware/uploadMiddleware';
 
 const ownerRouter = Router();
 
+ownerRouter.get('/user/:userId', ownerController.getOwnerByUserId);
+
 ownerRouter
   .route('/:id')
   .get(ownerController.getOwnerById)

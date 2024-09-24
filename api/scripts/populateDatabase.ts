@@ -6,7 +6,7 @@ dotenv.config();
 interface User {
   email: string;
   password: string;
-  role: 'sitter' | 'owner';
+  roles: string;
   firstName: string;
   lastName: string;
   city: string;
@@ -23,7 +23,7 @@ const users: User[] = [
   {
     email: 'sophie@test.com',
     password: 'test123',
-    role: 'sitter',
+    roles: 'sitter',
     firstName: 'Sophie',
     lastName: 'Roux',
     city: 'Lorient',
@@ -35,7 +35,7 @@ const users: User[] = [
   {
     email: 'marie@test.com',
     password: 'test123',
-    role: 'sitter',
+    roles: 'sitter',
     firstName: 'Marie',
     lastName: 'Dupont',
     city: 'Paris',
@@ -47,7 +47,7 @@ const users: User[] = [
   {
     email: 'jean@test.com',
     password: 'test123',
-    role: 'sitter',
+    roles: 'sitter',
     firstName: 'Jean',
     lastName: 'Martin',
     city: 'Lyon',
@@ -59,7 +59,7 @@ const users: User[] = [
   {
     email: 'lucie@test.com',
     password: 'test123',
-    role: 'owner',
+    roles: 'owner',
     firstName: 'Lucie',
     lastName: 'Bernard',
     city: 'Marseille',

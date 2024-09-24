@@ -70,6 +70,25 @@ export const getOwnerById = async (req: Request): Promise<I_OwnerDocument> => {
   }
 };
 
+export const getOwnerByUserId = async (
+  req: Request
+): Promise<I_OwnerDocument> => {
+  try {
+    const { userId } = req.params;
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      throw new CustomError(400, 'Invalid ID supplied');
+    }
+    const owner = await OwnerModel.findOne({ userId });
+    if (!owner) {
+      throw new CustomError(404, 'Owner not found');
+    }
+    return owner;
+  } catch (error: any) {
+    console.error('Error in getOwnerById:', error.message);
+    throw error;
+  }
+};
+
 export const updateOwner = async (
   req: ExtendsRequest
 ): Promise<I_OwnerDocument> => {
@@ -79,16 +98,11 @@ export const updateOwner = async (
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       throw new CustomError(400, 'Invalid ID supplied');
     }
-    // if (!headers || !headers.authorization) {
-    //   throw new CustomError(401, 'Authorization header is missing');
-    // }
 
     const owner = await OwnerModel.findById(id);
     if (!owner) {
       throw new CustomError(404, 'Owner not found');
     }
-
-    const userId = owner.userId;
 
     await validProfileAccess({
       tokenId: token?.id,

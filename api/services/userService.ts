@@ -1,7 +1,6 @@
 import bcrypt from 'bcrypt';
 import { Request } from 'express';
 import mongoose from 'mongoose';
-import { decodedJwtToken } from '../utils/decodedJwtToken';
 import * as sitterService from './sitterService';
 import * as ownerService from './ownerService';
 import { IncomingHttpHeaders } from 'http';
@@ -45,6 +44,9 @@ export const createUser = async (req: Request): Promise<I_UserDocument> => {
     // Hash the password
     const hashPassword = await bcrypt.hash(body.password, 12);
 
+    if (typeof body.roles === 'string') {
+      body.roles = body.roles.split(',').map((role: string) => role.trim());
+    }
     // Create and save the new User
     const newUser = new UserModel({
       email: body.email,
@@ -59,7 +61,7 @@ export const createUser = async (req: Request): Promise<I_UserDocument> => {
     if (body.roles.includes('sitter')) {
       await sitterService.createSitter(body);
     }
-    if (body.role.includes('owner')) {
+    if (body.roles.includes('owner')) {
       await ownerService.createOwner(body);
     }
 
@@ -93,15 +95,7 @@ export const updateUser = async (
 ): Promise<I_UserDocument> => {
   try {
     const { body, token } = req;
-
-    // if (!req.headers.authorization) {
-    //   throw new CustomError(401, 'Authorization header is missing');
-    // }
-
-    // const decodedJwt = await decodedJwtToken(req.headers.authorization);
     const updateData: Partial<I_UserUpdate> = {};
-
-    // Update email if provided
     if (body.email) {
       const existingEmail = await UserModel.findOne({ email: body.email });
       if (existingEmail) {
@@ -110,7 +104,6 @@ export const updateUser = async (
       updateData.email = body.email;
     }
 
-    // Update password if provided
     if (body.password) {
       const hashPassword = await bcrypt.hash(body.password, 12);
       updateData.password = hashPassword;
@@ -137,10 +130,6 @@ export const updateUser = async (
 export const deleteUser = async (req: ExtendsRequest): Promise<void> => {
   try {
     const { body, token } = req;
-    // if (!headers.authorization) {
-    //   throw new CustomError(401, 'Authorization header is missing');
-    // }
-    // const decodedJwt = await decodedJwtToken(headers.authorization);
 
     const user = await UserModel.findById(token?.id);
 

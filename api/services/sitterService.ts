@@ -52,7 +52,7 @@ export const getAllSitters = async (): Promise<I_SitterDocument[]> => {
     );
   }
 };
-// Service to get a Sitter by id
+
 export const getSitterById = async (
   req: Request
 ): Promise<I_SitterDocument> => {
@@ -62,6 +62,25 @@ export const getSitterById = async (
       throw new CustomError(400, 'Invalid ID supplied');
     }
     const sitter = await SitterModel.findById(id);
+    if (!sitter) {
+      throw new CustomError(404, 'Sitter not found');
+    }
+    return sitter;
+  } catch (error: any) {
+    console.error('Error in getSitterById:', error.message);
+    throw error;
+  }
+};
+
+export const getSitterByUserId = async (
+  req: Request
+): Promise<I_SitterDocument> => {
+  try {
+    const { userId } = req.params;
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      throw new CustomError(400, 'Invalid ID supplied');
+    }
+    const sitter = await SitterModel.findOne({ userId });
     if (!sitter) {
       throw new CustomError(404, 'Sitter not found');
     }

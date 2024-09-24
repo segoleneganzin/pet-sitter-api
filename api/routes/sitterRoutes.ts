@@ -5,10 +5,11 @@ import { upload, handleError } from '../middleware/uploadMiddleware';
 
 const sitterRouter = Router();
 
+sitterRouter.route('/user/:userId').get(sitterController.getSitterByUserId);
+
 sitterRouter
   .route('/:id')
   .get(sitterController.getSitterById)
-  // .patch(validateToken, sitterController.updateSitter);
   .patch(
     validateToken,
     upload.single('profilePicture'),

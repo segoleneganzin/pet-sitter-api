@@ -27,7 +27,6 @@ export const validateToken = async (
 
     // Decode and verify the JWT token
     const decodedJwtToken = jwt.verify(jwtToken, secretKey) as JwtPayload;
-    console.log('decodedToken : ', decodedJwtToken);
 
     // Type assertion to ensure decodedJwtToken has id
     if (!('id' in decodedJwtToken)) {
