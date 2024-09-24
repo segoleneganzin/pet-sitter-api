@@ -6,22 +6,12 @@ export const createUser = (req: Request, res: Response) => {
   handleResponseCreate('userController', res, userService.createUser(req));
 };
 
-export const getUser = (req: Request, res: Response) => {
+export const getUserById = (req: Request, res: Response) => {
   const successMessage = 'User retrieved successfully';
   handleResponse(
     'userController',
     res,
-    userService.getUser(req.headers),
-    successMessage
-  );
-};
-
-export const getUserEmail = async (req: Request, res: Response) => {
-  const successMessage = 'User email retrieved successfully';
-  handleResponse(
-    'sitterController',
-    res,
-    userService.getUserEmail(req),
+    userService.getUserById(req),
     successMessage
   );
 };
@@ -31,10 +21,7 @@ export const updateUser = (req: Request, res: Response) => {
   handleResponse(
     'userController',
     res,
-    userService.updateUser({
-      headers: req.headers,
-      body: req.body,
-    }),
+    userService.updateUser(req),
     successMessage
   );
 };
@@ -44,10 +31,7 @@ export const deleteUser = (req: Request, res: Response) => {
   handleResponse(
     'userController',
     res,
-    userService.deleteUser({
-      headers: req.headers,
-      body: req.body,
-    }),
+    userService.deleteUser(req),
     successMessage
   );
 };

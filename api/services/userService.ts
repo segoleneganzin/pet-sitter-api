@@ -12,9 +12,14 @@ import {
   I_UserUpdate,
   UserModel,
 } from '../database/models/userModel';
+import { SitterModel } from '../database/models/sitterModel';
+import { OwnerModel } from '../database/models/ownerModel';
 
 interface Headers extends IncomingHttpHeaders {
   authorization?: string;
+}
+interface ExtendsRequest extends Request {
+  token?: { id: string };
 }
 
 // Service to create a new user with formData
@@ -36,16 +41,7 @@ export const createUser = async (req: Request): Promise<I_UserDocument> => {
     if (!body.password) {
       throw new CustomError(400, 'Password is required');
     }
-    let newProfile = null;
-    if (body.role === 'sitter') {
-      newProfile = await sitterService.createSitter(body);
-    }
-    if (body.role === 'owner') {
-      newProfile = await ownerService.createOwner(body);
-    }
-    if (!newProfile) {
-      throw new CustomError(500, 'Profile creation failed');
-    }
+
     // Hash the password
     const hashPassword = await bcrypt.hash(body.password, 12);
 
@@ -53,11 +49,20 @@ export const createUser = async (req: Request): Promise<I_UserDocument> => {
     const newUser = new UserModel({
       email: body.email,
       password: hashPassword,
-      role: body.role,
-      profileId: newProfile.id,
+      roles: body.roles,
     });
 
     await newUser.save();
+
+    body.userId = newUser.id;
+
+    if (body.roles.includes('sitter')) {
+      await sitterService.createSitter(body);
+    }
+    if (body.role.includes('owner')) {
+      await ownerService.createOwner(body);
+    }
+
     return newUser;
   } catch (error: any) {
     console.error('Error in createUser:', error.message);
@@ -65,20 +70,16 @@ export const createUser = async (req: Request): Promise<I_UserDocument> => {
   }
 };
 
-// Service to get user details
-export const getUser = async (headers: Headers): Promise<I_UserDocument> => {
+export const getUserById = async (req: Request): Promise<I_UserDocument> => {
   try {
-    if (!headers.authorization) {
-      throw new CustomError(401, 'Authorization header is missing');
+    const { id } = req.params;
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      throw new CustomError(400, 'Invalid ID supplied');
     }
-
-    const decodedJwt = await decodedJwtToken(headers.authorization);
-
-    const user = await UserModel.findById(decodedJwt.id);
+    const user = await UserModel.findById(id);
     if (!user) {
       throw new CustomError(404, 'User not found');
     }
-
     return user;
   } catch (error: any) {
     console.error('Error in getUser:', error);
@@ -86,38 +87,18 @@ export const getUser = async (headers: Headers): Promise<I_UserDocument> => {
   }
 };
 
-export const getUserEmail = async (req: Request): Promise<string> => {
-  try {
-    const { profileId } = req.params; // sitterId or ownerId
-    if (!profileId || !mongoose.Types.ObjectId.isValid(profileId)) {
-      throw new CustomError(400, 'Invalid ID supplied');
-    }
-    const user = await UserModel.findOne({ profileId: profileId });
-
-    if (!user) {
-      throw new CustomError(404, 'User not found');
-    }
-    return user.email;
-  } catch (error: any) {
-    console.error('Error in getEmail:', error.message);
-    throw error;
-  }
-};
-
 // Service to update user details
-export const updateUser = async ({
-  headers,
-  body,
-}: {
-  headers: Headers;
-  body: I_UserUpdate;
-}): Promise<I_UserDocument> => {
+export const updateUser = async (
+  req: ExtendsRequest
+): Promise<I_UserDocument> => {
   try {
-    if (!headers.authorization) {
-      throw new CustomError(401, 'Authorization header is missing');
-    }
+    const { body, token } = req;
 
-    const decodedJwt = await decodedJwtToken(headers.authorization);
+    // if (!req.headers.authorization) {
+    //   throw new CustomError(401, 'Authorization header is missing');
+    // }
+
+    // const decodedJwt = await decodedJwtToken(req.headers.authorization);
     const updateData: Partial<I_UserUpdate> = {};
 
     // Update email if provided
@@ -136,7 +117,7 @@ export const updateUser = async ({
     }
 
     const updatedUser = await UserModel.findByIdAndUpdate(
-      decodedJwt.id,
+      token?.id,
       { $set: updateData },
       { new: true }
     );
@@ -153,19 +134,15 @@ export const updateUser = async ({
 };
 
 // Service to delete user
-export const deleteUser = async ({
-  headers,
-  body,
-}: {
-  headers: Headers;
-  body: I_User;
-}): Promise<void> => {
+export const deleteUser = async (req: ExtendsRequest): Promise<void> => {
   try {
-    if (!headers.authorization) {
-      throw new CustomError(401, 'Authorization header is missing');
-    }
-    const decodedJwt = await decodedJwtToken(headers.authorization);
-    const user = await UserModel.findById(decodedJwt.id);
+    const { body, token } = req;
+    // if (!headers.authorization) {
+    //   throw new CustomError(401, 'Authorization header is missing');
+    // }
+    // const decodedJwt = await decodedJwtToken(headers.authorization);
+
+    const user = await UserModel.findById(token?.id);
 
     if (!user) {
       throw new CustomError(404, 'User not found');
@@ -176,13 +153,15 @@ export const deleteUser = async ({
     if (body.email !== user.email || !isValid) {
       throw new CustomError(400, 'Invalid email/password supplied');
     }
+    if (user.roles.includes('sitter')) {
+      const sitter = await SitterModel.findOne({ userId: user.id });
+      await sitterService.deleteSitter(sitter?.id);
+    }
+    if (user.roles.includes('owner')) {
+      const owner = await OwnerModel.findOne({ userId: user.id });
+      await ownerService.deleteOwner(owner?.id);
+    }
 
-    if (user.role === 'sitter') {
-      await sitterService.deleteSitter(user.profileId);
-    }
-    if (user.role === 'owner') {
-      await ownerService.deleteOwner(user.profileId);
-    }
     await UserModel.findByIdAndDelete(user.id);
   } catch (error: any) {
     console.error('Error in deleteUser:', error.message);

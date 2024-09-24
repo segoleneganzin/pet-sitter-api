@@ -101,27 +101,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-    get:
-      tags:
-        - users
-      security:
-        - Bearer: []
-      summary: Get one user, by id on token
-      description: Get one user, by id on token
-      operationId: getUser
-      responses:
-        '200':
-          description: User retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserResponse'
-        '400':
-          description: Invalid status value
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
     patch:
       tags:
         - users
@@ -200,27 +179,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /users/{profileId}:
+  /users/{id}:
     parameters:
-      - name: profileId
+      - name: id of user
         in: path
-        description: user profileId
+        description: user id
         required: true
         schema:
           type: string
     get:
       tags:
         - users
-      summary: Get a user by his profileId and only return his email
-      description: ''
-      operationId: getUserEmail
+      summary: Get one user, by id
+      description: Get one user, by id
+      operationId: getUserById
       responses:
         '200':
-          description: User email retrieved successfully
+          description: User retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserEmailResponse'
+                $ref: '#/components/schemas/UserResponse'
         '400':
           description: Invalid ID supplied
           content:
@@ -239,6 +218,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
   /sitters:
     get:
       tags:
@@ -479,7 +459,7 @@ components:
       required:
         - email
         - password
-        - role
+        - roles
         - firstName
         - lastName
         - city
@@ -493,12 +473,14 @@ components:
           type: string
           description: The user's password (hashed)
           example: 'test123'
-        role:
-          type: string
-          enum:
-            - sitter
-            - owner
-          description: Role of the user
+        roles:
+          type: array
+          items:
+            type: string
+            enum:
+              - sitter
+              - owner
+          description: Role(s) of the user
         profilePicture:
           type: string
           format: uri
@@ -586,10 +568,14 @@ components:
               type: string
             email:
               type: string
-            role:
-              type: string
-            profileId:
-              type: string
+            roles:
+              type: array
+              items:
+                type: string
+                enum:
+                  - sitter
+                  - owner
+              description: Role(s) of the user
 
     Sitter:
       type: object
@@ -644,6 +630,9 @@ components:
               - nac
           description: List of pets the sitter accepts
           example: ['cat', 'dog', 'nac']
+        userId:
+          type: string
+          description: id of user
 
     SitterUpdate:
       type: object
@@ -751,6 +740,9 @@ components:
                   - nac
               description: List of pets the sitter now accepts
               example: ['cat']
+            userId:
+              type: string
+              description: id of user
 
     Owner:
       type: object
@@ -791,6 +783,9 @@ components:
             type: string
           description: List of pets the owner has
           example: ['dog', 'cat']
+        userId:
+          type: string
+          description: id of user
 
     OwnerUpdate:
       type: object
@@ -874,6 +869,9 @@ components:
                 type: string
               description: List of pets the owner now has
               example: ['dog']
+            userId:
+              type: string
+              description: id of user
 
     ErrorResponse:
       type: object

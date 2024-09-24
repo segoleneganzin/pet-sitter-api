@@ -7,6 +7,7 @@ export interface I_Owner {
   city: string;
   country: string;
   pets: string[];
+  userId: Types.ObjectId;
 }
 
 export interface I_OwnerDocument extends Document, I_Owner {
@@ -20,13 +21,14 @@ const ownerSchema = new Schema<I_OwnerDocument>({
   city: { type: String, required: true },
   country: { type: String, required: true },
   pets: { type: [String], required: true },
+  userId: { type: Schema.Types.ObjectId, ref: 'User', unique: true },
 });
 
 ownerSchema.set('toJSON', {
   transform: (doc, ret) => {
     ret.id = ret._id;
     delete ret._id;
-    delete ret.__v; // Optionally remove __v field if it's not needed
+    delete ret.__v;
   },
 });
 

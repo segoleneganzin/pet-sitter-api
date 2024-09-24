@@ -6,17 +6,13 @@ interface DecodedToken extends JwtPayload {
 }
 
 export const decodedJwtToken = async (
-  authHeader: string
+  authHeader: string | undefined
 ): Promise<DecodedToken> => {
-  if (!authHeader) {
-    throw new Error('Authorization header missing');
-  }
-  const jwtToken = authHeader.split('Bearer ')[1];
+  const jwtToken = authHeader?.split('Bearer ')[1];
   if (!jwtToken) {
     throw new CustomError(401, 'Token is missing');
   }
 
-  // Decode the JWT token
   const decodedJwtToken = jwt.decode(jwtToken) as JwtPayload | null;
 
   if (!decodedJwtToken || typeof decodedJwtToken === 'string') {

@@ -11,6 +11,10 @@ import {
 import { I_UserCreate } from '../database/models/userModel';
 import { capitalizeFirstLetter } from '../utils/formatWord';
 
+interface ExtendsRequest extends Request {
+  token?: { id: string };
+}
+
 // Service to create a new Sitter
 export const createSitter = async (
   serviceData: I_UserCreate
@@ -68,25 +72,26 @@ export const getSitterById = async (
   }
 };
 
-export const updateSitter = async (req: Request): Promise<I_SitterDocument> => {
+export const updateSitter = async (
+  req: ExtendsRequest
+): Promise<I_SitterDocument> => {
   try {
-    const { headers, body, file, params } = req;
+    const { body, file, params, token } = req;
     const { id } = params;
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       throw new CustomError(400, 'Invalid ID supplied');
     }
-    if (!headers || !headers.authorization) {
-      throw new CustomError(401, 'Authorization header is missing');
-    }
-    const profileId = new mongoose.Types.ObjectId(id);
-    await validProfileAccess({
-      authHeader: headers.authorization,
-      profileId,
-    });
+
     const sitter = await SitterModel.findById(id);
     if (!sitter) {
       throw new CustomError(404, 'Sitter not found');
     }
+
+    await validProfileAccess({
+      tokenId: token?.id,
+      userId: sitter.userId,
+    });
+
     if (file) {
       const oldImagePath = `./public/uploads/profilePicture${sitter.profilePicture}`;
       deleteFile(oldImagePath);
@@ -99,26 +104,16 @@ export const updateSitter = async (req: Request): Promise<I_SitterDocument> => {
         .split(',')
         .map((pet: string) => pet.trim());
     }
-    const updateData: Partial<I_Sitter> = {
-      profilePicture: body.profilePicture,
-      firstName: body.firstName,
-      lastName: body.lastName,
-      tel: body.tel,
-      city: body.city,
-      country: body.country,
-      presentation: body.presentation,
-      acceptedPets: body.acceptedPets,
-    };
 
-    const updatedSitter = await SitterModel.findByIdAndUpdate(
-      profileId,
-      { $set: updateData },
-      { new: true }
-    );
+    sitter.firstName = body.firstName || sitter.firstName;
+    sitter.lastName = body.lastName || sitter.lastName;
+    sitter.tel = body.tel || sitter.tel;
+    sitter.city = body.city || sitter.city;
+    sitter.country = body.country || sitter.country;
+    sitter.presentation = body.presentation || sitter.presentation;
+    sitter.acceptedPets = body.acceptedPets || sitter.acceptedPets;
 
-    if (!updatedSitter) {
-      throw new CustomError(404, 'Sitter not found');
-    }
+    const updatedSitter = await sitter.save();
 
     return updatedSitter;
   } catch (error: any) {
@@ -128,16 +123,16 @@ export const updateSitter = async (req: Request): Promise<I_SitterDocument> => {
 };
 
 export const deleteSitter = async (
-  sitterId: mongoose.Types.ObjectId
+  id: mongoose.Types.ObjectId
 ): Promise<void> => {
   try {
-    const sitter = await SitterModel.findById(sitterId);
+    const sitter = await SitterModel.findById(id);
     if (!sitter) {
       throw new CustomError(404, 'Sitter not found');
     }
     const profilePicture = `./public/uploads/profilePicture${sitter.profilePicture}`;
     deleteFile(profilePicture);
-    const deletedSitter = await SitterModel.findByIdAndDelete(sitterId);
+    const deletedSitter = await SitterModel.findByIdAndDelete(id);
     if (!deletedSitter) {
       throw new CustomError(404, 'Sitter not found');
     }

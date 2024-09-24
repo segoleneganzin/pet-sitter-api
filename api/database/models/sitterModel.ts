@@ -9,6 +9,7 @@ export interface I_Sitter {
   country: string;
   presentation: string;
   acceptedPets: ('cat' | 'dog' | 'nac')[];
+  userId: Types.ObjectId;
 }
 
 export interface I_SitterDocument extends Document, I_Sitter {
@@ -24,6 +25,7 @@ const sitterSchema = new Schema<I_SitterDocument>({
   country: { type: String, required: true },
   presentation: { type: String, required: true },
   acceptedPets: { type: [String], required: true },
+  userId: { type: Schema.Types.ObjectId, ref: 'User', unique: true },
 });
 
 sitterSchema.set('toJSON', {

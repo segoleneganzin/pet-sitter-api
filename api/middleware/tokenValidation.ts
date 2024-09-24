@@ -13,25 +13,29 @@ export const validateToken = async (
   next: NextFunction
 ) => {
   try {
-    // Check if the token is present in the headers
     const authHeader = req.headers.authorization;
-    if (!authHeader) {
-      throw new Error('Unauthorized: missing header');
-    }
 
-    // Extract the JWT token from the 'Authorization' header
-    const token = authHeader.split('Bearer ')[1]?.trim();
-    if (!token) {
-      throw new Error('Unauthorized: missing token');
+    if (!authHeader) {
+      throw new CustomError(400, 'Authorization header missing');
+    }
+    const jwtToken = authHeader.split('Bearer ')[1]?.trim();
+    if (!jwtToken) {
+      throw new CustomError(401, 'Unauthorized: missing token');
     }
 
     const secretKey = process.env.SECRET_KEY || 'default-secret-key';
 
     // Decode and verify the JWT token
-    const decodedToken = jwt.verify(token, secretKey) as JwtPayload;
+    const decodedJwtToken = jwt.verify(jwtToken, secretKey) as JwtPayload;
+    console.log('decodedToken : ', decodedJwtToken);
+
+    // Type assertion to ensure decodedJwtToken has id
+    if (!('id' in decodedJwtToken)) {
+      throw new CustomError(401, 'JWT token does not contain an id');
+    }
 
     // Add the decoded token information to the request object
-    (req as CustomRequest).token = decodedToken;
+    (req as CustomRequest).token = decodedJwtToken;
 
     next(); // Proceed to the next middleware
   } catch (error) {

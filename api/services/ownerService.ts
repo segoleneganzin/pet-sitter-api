@@ -11,6 +11,10 @@ import {
 import { I_UserCreate } from '../database/models/userModel';
 import { capitalizeFirstLetter } from '../utils/formatWord';
 
+interface ExtendsRequest extends Request {
+  token?: { id: string };
+}
+
 // Service to create a new Sitter
 export const createOwner = async (
   serviceData: I_UserCreate
@@ -66,25 +70,31 @@ export const getOwnerById = async (req: Request): Promise<I_OwnerDocument> => {
   }
 };
 
-export const updateOwner = async (req: Request): Promise<I_OwnerDocument> => {
+export const updateOwner = async (
+  req: ExtendsRequest
+): Promise<I_OwnerDocument> => {
   try {
-    const { headers, body, file, params } = req;
+    const { body, file, params, token } = req;
     const { id } = params;
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       throw new CustomError(400, 'Invalid ID supplied');
     }
-    if (!headers || !headers.authorization) {
-      throw new CustomError(401, 'Authorization header is missing');
-    }
-    const profileId = new mongoose.Types.ObjectId(id);
-    await validProfileAccess({
-      authHeader: headers.authorization,
-      profileId,
-    });
+    // if (!headers || !headers.authorization) {
+    //   throw new CustomError(401, 'Authorization header is missing');
+    // }
+
     const owner = await OwnerModel.findById(id);
     if (!owner) {
       throw new CustomError(404, 'Owner not found');
     }
+
+    const userId = owner.userId;
+
+    await validProfileAccess({
+      tokenId: token?.id,
+      userId: owner.userId,
+    });
+
     if (file) {
       const oldImagePath = `./public/uploads/profilePicture${owner.profilePicture}`;
       deleteFile(oldImagePath);
@@ -95,23 +105,13 @@ export const updateOwner = async (req: Request): Promise<I_OwnerDocument> => {
     if (typeof body.pets === 'string') {
       body.pets = body.pets.split(',');
     }
-    const updateData: Partial<I_Owner> = {
-      profilePicture: body.profilePicture,
-      firstName: body.firstName,
-      lastName: body.lastName,
-      city: body.city,
-      country: body.country,
-      pets: body.pets,
-    };
-    const updatedOwner = await OwnerModel.findByIdAndUpdate(
-      profileId,
-      { $set: updateData },
-      { new: true }
-    );
+    owner.firstName = body.firstName || owner.firstName;
+    owner.lastName = body.lastName || owner.lastName;
+    owner.city = body.city || owner.city;
+    owner.country = body.country || owner.country;
+    owner.pets = body.pets || owner.pets;
 
-    if (!updatedOwner) {
-      throw new CustomError(404, 'Owner not found');
-    }
+    const updatedOwner = await owner.save();
 
     return updatedOwner;
   } catch (error: any) {
@@ -121,16 +121,16 @@ export const updateOwner = async (req: Request): Promise<I_OwnerDocument> => {
 };
 
 export const deleteOwner = async (
-  ownerId: mongoose.Types.ObjectId
+  id: mongoose.Types.ObjectId
 ): Promise<void> => {
   try {
-    const owner = await OwnerModel.findById(ownerId);
+    const owner = await OwnerModel.findById(id);
     if (!owner) {
       throw new CustomError(404, 'Owner not found');
     }
     const profilePicture = `./public/uploads/profilePicture${owner.profilePicture}`;
     deleteFile(profilePicture);
-    const deletedOwner = await OwnerModel.findByIdAndDelete(ownerId);
+    const deletedOwner = await OwnerModel.findByIdAndDelete(id);
     if (!deletedOwner) {
       throw new CustomError(404, 'Owner not found');
     }
