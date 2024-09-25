@@ -40,8 +40,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Handle custom routes
-app.use('/api/v1/sitters', sittersRoutes);
-app.use('/api/v1/owners', ownerRoutes);
+app.use('/api/v1/users/sitters', sittersRoutes);
+app.use('/api/v1/users/owners', ownerRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/auth', authRoutes);
 

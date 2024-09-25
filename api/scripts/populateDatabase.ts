@@ -1,79 +1,114 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
+import { I_UserCreate } from '../database/models/userModel';
 
 dotenv.config();
 
-interface User {
-  email: string;
-  password: string;
-  roles: string;
-  firstName: string;
-  lastName: string;
-  city: string;
-  country: string;
-  tel?: string;
-  presentation?: string;
-  acceptedPets?: string;
-  pets?: string;
-}
-
 const signupApi = 'http://localhost:3000/api/v1/users';
 
-const users: User[] = [
+const users: I_UserCreate[] = [
   {
-    email: 'sophie@test.com',
-    password: 'test123',
+    email: 'alice@example.com',
+    password: 'hashed_password_1',
     roles: 'sitter',
-    firstName: 'Sophie',
-    lastName: 'Roux',
-    city: 'Lorient',
-    country: 'France',
-    tel: '0851689255',
-    presentation: 'Lorem Ipsum',
-    acceptedPets: 'dog, cat',
+    firstName: 'Alice',
+    lastName: 'Smith',
+    city: 'New York',
+    country: 'USA',
+    tel: '123-456-7890',
+    presentation: 'Lover of all pets!',
+    acceptedPets: 'cat,dog',
   },
   {
-    email: 'marie@test.com',
-    password: 'test123',
-    roles: 'sitter',
-    firstName: 'Marie',
-    lastName: 'Dupont',
-    city: 'Paris',
-    country: 'France',
-    tel: '0851689255',
-    presentation: 'Lorem Ipsum',
-    acceptedPets: 'dog, cat',
-  },
-  {
-    email: 'jean@test.com',
-    password: 'test123',
-    roles: 'sitter',
-    firstName: 'Jean',
-    lastName: 'Martin',
-    city: 'Lyon',
-    country: 'France',
-    tel: '0851689255',
-    presentation: 'Lorem Ipsum',
-    acceptedPets: 'dog, cat',
-  },
-  {
-    email: 'lucie@test.com',
-    password: 'test123',
+    email: 'bob@example.com',
+    password: 'hashed_password_2',
     roles: 'owner',
-    firstName: 'Lucie',
-    lastName: 'Bernard',
-    city: 'Marseille',
-    country: 'France',
+    firstName: 'Bob',
+    lastName: 'Johnson',
+    city: 'Los Angeles',
+    country: 'USA',
+    pets: 'dog',
+  },
+  {
+    email: 'charlie@example.com',
+    password: 'hashed_password_3',
+    roles: 'sitter, owner',
+    firstName: 'Charlie',
+    lastName: 'Brown',
+    city: 'Chicago',
+    country: 'USA',
+    tel: '234-567-8901',
+    presentation: 'Experienced pet sitter.',
+    acceptedPets: 'cat,dog,nac',
+    pets: 'cat, nac',
+  },
+  {
+    email: 'david@example.com',
+    password: 'hashed_password_4',
+    roles: 'owner',
+    firstName: 'David',
+    lastName: 'Williams',
+    city: 'San Francisco',
+    country: 'USA',
     pets: 'dog, cat',
+  },
+  {
+    email: 'eve@example.com',
+    password: 'hashed_password_5',
+    roles: 'sitter',
+    firstName: 'Eve',
+    lastName: 'Davis',
+    city: 'Seattle',
+    country: 'USA',
+    tel: '345-678-9012',
+    presentation: 'Pet lover and caregiver.',
+    acceptedPets: 'dog',
+  },
+  {
+    email: 'frank@example.com',
+    password: 'hashed_password_6',
+    roles: 'sitter, owner',
+    firstName: 'Frank',
+    lastName: 'Miller',
+    city: 'Houston',
+    country: 'USA',
+    tel: '456-789-0123',
+    presentation: 'Passionate about animals!',
+    acceptedPets: 'cat, dog',
+    pets: 'dog',
+  },
+  {
+    email: 'grace@example.com',
+    password: 'hashed_password_7',
+    roles: 'owner',
+    firstName: 'Grace',
+    lastName: 'Garcia',
+    city: 'Phoenix',
+    country: 'USA',
+    pets: 'cat',
+  },
+  {
+    email: 'hank@example.com',
+    password: 'hashed_password_8',
+    roles: 'sitter',
+    firstName: 'Hank',
+    lastName: 'Lopez',
+    city: 'Philadelphia',
+    country: 'USA',
+    tel: '567-890-1234',
+    presentation: 'Friendly and responsible.',
+    acceptedPets: 'nac',
   },
 ];
 
-users.forEach((user: User) => {
+users.forEach((user: I_UserCreate) => {
   const formData = new FormData();
   Object.keys(user).forEach((key) => {
-    const value = user[key as keyof User];
+    const value = user[key as keyof I_UserCreate];
     if (value !== undefined) {
       if (Array.isArray(value)) {
+        formData.append(key, JSON.stringify(value));
+      } else if (typeof value === 'object') {
         formData.append(key, JSON.stringify(value));
       } else {
         formData.append(key, value);

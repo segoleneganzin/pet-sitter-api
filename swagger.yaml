@@ -68,14 +68,13 @@ paths:
     post:
       tags:
         - users
-      summary: Add a new user
-      description: Add a new user (create automatically sitter or owner, depending on role)
-      operationId: createUser
+      summary: Create a new user
       requestBody:
+        required: true
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/UserCreate'
+              $ref: '#/components/schemas/User'
       responses:
         '201':
           description: User created successfully
@@ -108,13 +107,12 @@ paths:
         - Bearer: []
       summary: Update user, by id on token
       description: This can only be done by the logged-in user.
-      operationId: updateUser
       requestBody:
         description: Update an existing user
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserUpdate'
+              $ref: '#/components/schemas/User'
       responses:
         '200':
           description: User updated successully
@@ -152,14 +150,8 @@ paths:
       security:
         - Bearer: []
       summary: Delete user
-      description: This can only be done by the logged-in user. It deletes the profile at the same time (owner or sitter) and profilePicture in db.
+      description: This can only be done by the logged-in user. It deletes the profilePicture in db.
       operationId: deleteUser
-      requestBody:
-        description: Delete a user
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AuthLogin'
       responses:
         '400':
           description: Invalid email/password supplied
@@ -179,20 +171,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
   /users/{id}:
-    parameters:
-      - name: id of user
-        in: path
-        description: user id
-        required: true
-        schema:
-          type: string
     get:
       tags:
         - users
       summary: Get one user, by id
       description: Get one user, by id
       operationId: getUserById
+      parameters:
+        - name: id
+          in: path
+          description: User id
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: User retrieved successfully
@@ -232,73 +225,35 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SittersResponse'
+                $ref: '#/components/schemas/UsersResponse'
         '500':
           description: Failed to retrieve Sitters. Please try again later.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
   /sitters/{id}:
-    parameters:
-      - name: id
-        in: path
-        description: ID of sitter that needs to be fetched
-        required: true
-        schema:
-          type: string
     get:
       tags:
         - sitters
       summary: Get one sitter by ID
       description: ''
       operationId: getSitterById
+      parameters:
+        - name: id
+          in: path
+          description: User id
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Sitter retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SitterResponse'
-        '400':
-          description: Invalid ID supplied
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: Sitter not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-    patch:
-      tags:
-        - sitters
-      security:
-        - Bearer: []
-      summary: Update sitter
-      description: This can only be done by the logged-in sitter.
-      operationId: updateSitter
-      requestBody:
-        description: Update an existing sitter
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/SitterUpdate'
-      responses:
-        '200':
-          description: Sitter updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SitterResponse'
+                $ref: '#/components/schemas/UserResponse'
         '400':
           description: Invalid ID supplied
           content:
@@ -331,7 +286,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OwnersResponse'
+                $ref: '#/components/schemas/UsersResponse'
         '400':
           description: Invalid data
           content:
@@ -351,65 +306,26 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
   /owners/{id}:
-    parameters:
-      - name: id
-        in: path
-        description: ID of owner that needs to be fetched
-        required: true
-        schema:
-          type: string
     get:
       tags:
         - owners
       summary: Get one owner by ID
       description: ''
       operationId: getOwnerById
+      parameters:
+        - name: id
+          in: path
+          description: ID of sitter that needs to be fetched
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Owner retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OwnerResponse'
-        '400':
-          description: Invalid ID supplied
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: Owner not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-    patch:
-      tags:
-        - owners
-      security:
-        - Bearer: []
-      summary: Update owner
-      description: This can only be done by the logged-in owner.
-      operationId: updateOwner
-      requestBody:
-        description: Update an existing owner
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/OwnerUpdate'
-      responses:
-        '200':
-          description: Owner updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OwnerResponse'
+                $ref: '#/components/schemas/UserResponse'
         '400':
           description: Invalid ID supplied
           content:
@@ -454,7 +370,74 @@ components:
             token:
               type: string
 
-    UserCreate:
+    UserDocument:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the user (MongoDB ObjectId)
+          example: '60d21b4667d0d8992e610c85'
+        email:
+          type: string
+          description: The user's email address
+          example: 'user@example.com'
+        roles:
+          type: array
+          items:
+            type: string
+            enum:
+              - sitter
+              - owner
+          description: Role(s) of the user
+        profilePicture:
+          type: string
+          format: uri
+          description: URL of the owner's profile picture
+        firstName:
+          type: string
+          description: The owner/sitter's first name
+          example: 'John'
+        lastName:
+          type: string
+          description: The owner/sitter's last name
+          example: 'Doe'
+        city:
+          type: string
+          description: The owner/sitter's city of residence
+          example: 'New York'
+        country:
+          type: string
+          description: The owner/sitter's country of residence
+          example: 'USA'
+        tel:
+          type: string
+          description: The sitter's tel
+          example: '0754845555'
+        presentation:
+          type: string
+          description: A short bio or presentation for the sitter
+          example: 'I have been a pet sitter for 5 years and love animals.'
+        acceptedPets:
+          type: array
+          items:
+            type: string
+            enum:
+              - cat
+              - dog
+              - nac
+          description: List of pets the sitter accepts
+          example: ['cat', 'dog', 'nac']
+        pets:
+          type: array
+          items:
+            type: string
+            enum:
+              - cat
+              - dog
+              - nac
+          description: List of pets the owner has
+
+    User:
       type: object
       required:
         - email
@@ -523,36 +506,11 @@ components:
           type: array
           items:
             type: string
+            enum:
+              - cat
+              - dog
+              - nac
           description: List of pets the owner has
-          example: ['dog', 'cat']
-
-    UserUpdate:
-      type: object
-      properties:
-        status:
-          type: integer
-        message:
-          type: string
-        body:
-          type: object
-          properties:
-            email:
-              type: string
-            password:
-              type: string
-
-    UserEmailResponse:
-      type: object
-      properties:
-        status:
-          type: integer
-        message:
-          type: string
-        body:
-          type: object
-          properties:
-            email:
-              type: string
 
     UserResponse:
       type: object
@@ -563,121 +521,9 @@ components:
           type: string
         body:
           type: object
-          properties:
-            id:
-              type: string
-            email:
-              type: string
-            roles:
-              type: array
-              items:
-                type: string
-                enum:
-                  - sitter
-                  - owner
-              description: Role(s) of the user
+          $ref: '#/components/schemas/UserDocument'
 
-    Sitter:
-      type: object
-      required:
-        - firstName
-        - lastName
-        - tel
-        - city
-        - country
-        - presentation
-        - acceptedPets
-      properties:
-        id:
-          type: string
-          description: The unique identifier for the sitter (MongoDB ObjectId)
-          example: '60d21b4667d0d8992e610c85'
-        profilePicture:
-          type: string
-          description: URL of the sitter's profile picture
-          example: 'https://example.com/pic.jpg'
-        firstName:
-          type: string
-          description: The sitter's first name
-          example: 'John'
-        lastName:
-          type: string
-          description: The sitter's last name
-          example: 'Doe'
-        tel:
-          type: string
-          description: The sitter's phone number
-          example: '+1-555-5555'
-        city:
-          type: string
-          description: The sitter's city of residence
-          example: 'New York'
-        country:
-          type: string
-          description: The sitter's country of residence
-          example: 'USA'
-        presentation:
-          type: string
-          description: A short bio or presentation for the sitter
-          example: 'I have been a pet sitter for 5 years and love animals.'
-        acceptedPets:
-          type: array
-          items:
-            type: string
-            enum:
-              - cat
-              - dog
-              - nac
-          description: List of pets the sitter accepts
-          example: ['cat', 'dog', 'nac']
-        userId:
-          type: string
-          description: id of user
-
-    SitterUpdate:
-      type: object
-      properties:
-        profilePicture:
-          type: string
-          format: uri
-          description: URL of the sitter's profile picture
-          example: 'https://example.com/new-pic.jpg'
-        firstName:
-          type: string
-          description: The sitter's first name
-          example: 'Jane'
-        lastName:
-          type: string
-          description: The sitter's last name
-          example: 'Smith'
-        tel:
-          type: string
-          description: The sitter's phone number
-          example: '+1-555-1234'
-        city:
-          type: string
-          description: The sitter's city of residence
-          example: 'Los Angeles'
-        country:
-          type: string
-          description: The sitter's country of residence
-          example: 'Canada'
-        presentation:
-          type: string
-          description: A new bio or presentation for the sitter
-          example: 'I have been a professional sitter for 7 years.'
-        acceptedPets:
-          type: array
-          items:
-            type: string
-            enum:
-              - cat
-              - dog
-              - nac
-          description: List of pets the sitter now accepts
-          example: ['cat']
-
-    SittersResponse:
+    UsersResponse:
       type: object
       properties:
         status:
@@ -687,191 +533,7 @@ components:
         body:
           type: array
           items:
-            $ref: '#/components/schemas/Sitter'
-
-    SitterResponse:
-      type: object
-      properties:
-        status:
-          type: integer
-        message:
-          type: string
-        body:
-          type: object
-          properties:
-            id:
-              type: string
-              description: Id of account
-            profilePicture:
-              type: string
-              description: URL of the sitter's profile picture
-              example: 'https://example.com/new-pic.jpg'
-            firstName:
-              type: string
-              description: The sitter's first name
-              example: 'Jane'
-            lastName:
-              type: string
-              description: The sitter's last name
-              example: 'Smith'
-            tel:
-              type: string
-              description: The sitter's phone number
-              example: '+1-555-1234'
-            city:
-              type: string
-              description: The sitter's city of residence
-              example: 'Los Angeles'
-            country:
-              type: string
-              description: The sitter's country of residence
-              example: 'Canada'
-            presentation:
-              type: string
-              description: A new bio or presentation for the sitter
-              example: 'I have been a professional sitter for 7 years.'
-            acceptedPets:
-              type: array
-              items:
-                type: string
-                enum:
-                  - cat
-                  - dog
-                  - nac
-              description: List of pets the sitter now accepts
-              example: ['cat']
-            userId:
-              type: string
-              description: id of user
-
-    Owner:
-      type: object
-      required:
-        - firstName
-        - lastName
-        - city
-        - country
-        - pets
-      properties:
-        id:
-          type: string
-          description: The unique identifier for the owner (MongoDB ObjectId)
-          example: '60d21b4667d0d8992e610c85'
-        profilePicture:
-          type: string
-          description: URL of the owner's profile picture
-          example: 'https://example.com/pic.jpg'
-        firstName:
-          type: string
-          description: The owner's first name
-          example: 'John'
-        lastName:
-          type: string
-          description: The owner's last name
-          example: 'Doe'
-        city:
-          type: string
-          description: The owner's city of residence
-          example: 'New York'
-        country:
-          type: string
-          description: The owner's country of residence
-          example: 'USA'
-        pets:
-          type: array
-          items:
-            type: string
-          description: List of pets the owner has
-          example: ['dog', 'cat']
-        userId:
-          type: string
-          description: id of user
-
-    OwnerUpdate:
-      type: object
-      properties:
-        profilePicture:
-          type: string
-          format: uri
-          description: URL of the owner's new profile picture
-          example: 'https://example.com/new-pic.jpg'
-        firstName:
-          type: string
-          description: The owner's new first name
-          example: 'Jane'
-        lastName:
-          type: string
-          description: The owner's new last name
-          example: 'Smith'
-        city:
-          type: string
-          description: The owner's new city of residence
-          example: 'Los Angeles'
-        country:
-          type: string
-          description: The owner's new country of residence
-          example: 'Canada'
-        pets:
-          type: array
-          items:
-            type: string
-          description: List of pets the owner now has
-          example: ['dog']
-
-    OwnersResponse:
-      type: object
-      properties:
-        status:
-          type: integer
-        message:
-          type: string
-        body:
-          type: array
-          items:
-            $ref: '#/components/schemas/Owner'
-
-    OwnerResponse:
-      type: object
-      properties:
-        status:
-          type: integer
-        message:
-          type: string
-        body:
-          type: object
-          properties:
-            id:
-              type: string
-              description: Id of account
-            profilePicture:
-              type: string
-              description: URL of the owner's new profile picture
-              example: 'https://example.com/new-pic.jpg'
-            firstName:
-              type: string
-              description: The owner's new first name
-              example: 'Jane'
-            lastName:
-              type: string
-              description: The owner's new last name
-              example: 'Smith'
-            city:
-              type: string
-              description: The owner's new city of residence
-              example: 'Los Angeles'
-            country:
-              type: string
-              description: The owner's new country of residence
-              example: 'Canada'
-            pets:
-              type: array
-              items:
-                type: string
-              description: List of pets the owner now has
-              example: ['dog']
-            userId:
-              type: string
-              description: id of user
+            $ref: '#/components/schemas/UserDocument'
 
     ErrorResponse:
       type: object
