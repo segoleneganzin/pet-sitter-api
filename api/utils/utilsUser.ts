@@ -1,7 +1,4 @@
-import bcrypt from 'bcrypt';
-import { I_UserDocument } from '../database/models/userModel';
 import { CustomError } from './customError';
-import { deleteFile } from './deleteFile';
 import { capitalizeFirstLetter } from './formatWord';
 
 export const handleRoleData = (body: any) => {
@@ -64,7 +61,6 @@ export const validateRoleData = (body: any) => {
       throw new CustomError(400, 'Accepted pets are required for sitters');
     }
   }
-
   if (body.roles.includes('owner')) {
     if (!body.pets) {
       throw new CustomError(400, 'Pets are required for owners');

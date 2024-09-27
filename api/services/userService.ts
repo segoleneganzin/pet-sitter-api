@@ -56,7 +56,7 @@ export const getUserById = async (req: Request): Promise<I_UserDocument> => {
     }
     return user;
   } catch (error: any) {
-    console.error('Error in getUser:', error);
+    console.error('Error in getUserById:', error);
     throw error;
   }
 };

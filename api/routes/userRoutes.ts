@@ -10,7 +10,11 @@ userRouter.get('/:id', userController.getUserById);
 userRouter
   .route('')
   .post(upload.single('profilePicture'), userController.createUser, handleError)
-  .patch(validateToken, userController.updateUser)
+  .patch(
+    validateToken,
+    upload.single('profilePicture'),
+    userController.updateUser
+  )
   .delete(validateToken, userController.deleteUser);
 
 export default userRouter;
