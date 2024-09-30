@@ -66,7 +66,6 @@ export const updateUser = async (
 ): Promise<I_UserDocument> => {
   try {
     const { body, file, token } = req;
-
     const user = await UserModel.findById(token?.id);
 
     if (!user) {
@@ -77,23 +76,10 @@ export const updateUser = async (
 
     handleRoleData(body);
 
-    if (body.email) {
-      const existingEmail = await UserModel.findOne({ email: body.email });
-      if (existingEmail) {
-        throw new CustomError(409, 'Email already exists');
-      }
-      user.email = body.email;
-    }
-    if (body.password) {
-      user.password = bcrypt.hashSync(body.password, 12);
-    }
-
-    if (body.profilePicture && file) {
+    if (file) {
       const oldImagePath = `./public/uploads/profilePicture${user.profilePicture}`;
       deleteFile(oldImagePath);
-      body.profilePicture = `/${file.filename}`;
-    } else {
-      body.profilePicture = user.profilePicture;
+      user.profilePicture = `/${file.filename}`;
     }
 
     user.firstName = capitalizeFirstLetter(body.firstName) || user.firstName;

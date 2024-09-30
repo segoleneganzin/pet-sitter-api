@@ -2,9 +2,12 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 
 type Roles = 'sitter' | 'owner';
 type Pets = 'cat' | 'dog' | 'nac';
-export interface I_User {
+
+export interface I_Auth {
   email: string;
   password: string;
+}
+export interface I_User extends I_Auth {
   roles: Roles[];
   profilePicture?: string;
   firstName: string;

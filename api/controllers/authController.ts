@@ -11,3 +11,13 @@ export const login = async (req: Request, res: Response) => {
     successMessage
   );
 };
+
+export const updateLog = async (req: Request, res: Response) => {
+  const successMessage = 'Log updated successully';
+  handleResponse(
+    'authController',
+    res,
+    authService.updateLog(req),
+    successMessage
+  );
+};

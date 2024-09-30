@@ -25,7 +25,7 @@ tags:
     description: Everything about owners
 
 paths:
-  /auth/login:
+  /auth:
     post:
       tags:
         - auth
@@ -63,7 +63,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
+    patch:
+      tags:
+        - auth
+      security:
+        - Bearer: []
+      summary: Update log (email or pssword), by id on token
+      description: This can only be done by the logged-in user.
+      requestBody:
+        description: Update an existing user log
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLogin'
+      responses:
+        '200':
+          description: Log updated successully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: Authorization header is missing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Failed to update user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /users:
     post:
       tags:
@@ -456,6 +499,65 @@ components:
           type: string
           description: The user's password (hashed)
           example: 'test123'
+        roles:
+          type: array
+          items:
+            type: string
+            enum:
+              - sitter
+              - owner
+          description: Role(s) of the user
+        profilePicture:
+          type: string
+          format: uri
+          description: URL of the owner's profile picture
+        firstName:
+          type: string
+          description: The owner/sitter's first name
+          example: 'John'
+        lastName:
+          type: string
+          description: The owner/sitter's last name
+          example: 'Doe'
+        city:
+          type: string
+          description: The owner/sitter's city of residence
+          example: 'New York'
+        country:
+          type: string
+          description: The owner/sitter's country of residence
+          example: 'USA'
+        tel:
+          type: string
+          description: The sitter's tel
+          example: '0754845555'
+        presentation:
+          type: string
+          description: A short bio or presentation for the sitter
+          example: 'I have been a pet sitter for 5 years and love animals.'
+        acceptedPets:
+          type: array
+          items:
+            type: string
+            enum:
+              - cat
+              - dog
+              - nac
+          description: List of pets the sitter accepts
+          example: ['cat', 'dog', 'nac']
+        pets:
+          type: array
+          items:
+            type: string
+            enum:
+              - cat
+              - dog
+              - nac
+          description: List of pets the owner has
+
+    UserUpdate:
+      type: object
+      properties:
         roles:
           type: array
           items:
