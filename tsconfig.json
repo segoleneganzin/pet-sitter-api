@@ -1,14 +1,19 @@
 {
   "compilerOptions": {
-    "target": "ES6",
-    "module": "commonjs",
-    "rootDir": "./api",
-    "outDir": "./dist",
+    "moduleResolution": "node",
+    "target": "ESNext",
+    "module": "ESNext",
+    "rootDir": "api",
+    "outDir": "dist",
+    "baseUrl": ".",
+    "sourceMap": true,
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true
   },
-  "include": ["api/**/*.ts", "public/*"],
+  "include": ["api", "api/**/*.ts", "public/uploads/**/*", "@types/**/*.d.ts"],
   "exclude": ["node_modules", "dist"]
 }
