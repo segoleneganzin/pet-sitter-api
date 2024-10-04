@@ -20,7 +20,7 @@ const PORT = process.env.PORT || 3000;
 dbConnection()
   .then(() => {
     app.listen(PORT, () => {
-      console.log(`Server listening on http://localhost:${PORT}`);
+      console.log(`Server listening on port :${PORT}`);
     });
   })
   .catch((err: unknown) => {
@@ -28,7 +28,11 @@ dbConnection()
     process.exit(1);
   });
 
-app.use(cors());
+app.use(
+  cors({
+    origin: 'http://localhost:5173/',
+  })
+);
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 

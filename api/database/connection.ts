@@ -4,8 +4,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const connectionString: string = process.env.ATLAS_URI || '';
-// const client = new MongoClient(connectionString);
-// let dbInstance: Db;
 
 export const dbConnection = async () => {
   try {
