@@ -2,7 +2,8 @@ import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import path from 'path';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { dbConnection } from './database/connection';
 import sittersRoutes from './routes/sitterRoutes';
 import userRoutes from './routes/userRoutes';
@@ -12,6 +13,8 @@ import swaggerUi from 'swagger-ui-express';
 import yaml from 'yamljs';
 
 dotenv.config();
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const swaggerDocs = yaml.load('./swagger.yaml');
 const app = express();
