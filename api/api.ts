@@ -28,11 +28,7 @@ dbConnection()
     process.exit(1);
   });
 
-app.use(
-  cors({
-    origin: 'http://localhost:5173/',
-  })
-);
+app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
