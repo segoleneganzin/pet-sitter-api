@@ -1,0 +1,1 @@
+{"version":3,"file":"ownerRoutes.js","sourceRoot":"","sources":["../../api/routes/ownerRoutes.ts"],"names":[],"mappings":";;;;;;;;;;;;;;;;;;;;;;;;;AAAA,qCAAiC;AACjC,mFAAqE;AAErE,MAAM,WAAW,GAAG,IAAA,gBAAM,GAAE,CAAC;AAE7B,WAAW,CAAC,GAAG,CAAC,MAAM,EAAE,eAAe,CAAC,YAAY,CAAC,CAAC;AAEtD,WAAW,CAAC,GAAG,CAAC,GAAG,EAAE,eAAe,CAAC,YAAY,CAAC,CAAC;AAEnD,kBAAe,WAAW,CAAC"}
