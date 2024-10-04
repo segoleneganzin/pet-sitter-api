@@ -21,13 +21,3 @@ export const getOwnerById = async (req: Request, res: Response) => {
     successMessage
   );
 };
-
-export const updateOwner = (req: Request, res: Response) => {
-  const successMessage = 'Owner updated successfully';
-  handleResponse(
-    'ownerController',
-    res,
-    ownerService.updateOwner(req),
-    successMessage
-  );
-};

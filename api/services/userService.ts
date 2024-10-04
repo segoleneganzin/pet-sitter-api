@@ -1,61 +1,40 @@
 import bcrypt from 'bcrypt';
 import { Request } from 'express';
 import mongoose from 'mongoose';
-import { decodedJwtToken } from '../utils/decodedJwtToken';
-import * as sitterService from './sitterService';
-import * as ownerService from './ownerService';
-import { IncomingHttpHeaders } from 'http';
 import { CustomError } from '../utils/customError';
+import { I_UserDocument, UserModel } from '../database/models/userModel';
+import { deleteFile } from '../utils/deleteFile';
+import { capitalizeFirstLetter } from '../utils/formatWord';
 import {
-  I_UserDocument,
-  I_User,
-  I_UserUpdate,
-  UserModel,
-} from '../database/models/userModel';
+  handleRoleData,
+  prepareUserData,
+  validateRoleData,
+} from '../utils/utilsUser';
 
-interface Headers extends IncomingHttpHeaders {
-  authorization?: string;
+interface ExtendsRequest extends Request {
+  token?: { id: string };
 }
 
-// Service to create a new user with formData
 export const createUser = async (req: Request): Promise<I_UserDocument> => {
   try {
     const { body, file } = req;
 
-    if (file) {
-      body.profilePicture = `/${file.filename}`;
-    } else {
-      body.profilePicture = '/default-profile-picture.png';
-    }
-
     // Check if email already exists
-    const existingEmail = await UserModel.findOne({ email: body.email });
-    if (existingEmail) {
+    if (await UserModel.findOne({ email: body.email })) {
       throw new CustomError(409, 'Email already exists');
     }
     if (!body.password) {
       throw new CustomError(400, 'Password is required');
     }
-    let newProfile = null;
-    if (body.role === 'sitter') {
-      newProfile = await sitterService.createSitter(body);
-    }
-    if (body.role === 'owner') {
-      newProfile = await ownerService.createOwner(body);
-    }
-    if (!newProfile) {
-      throw new CustomError(500, 'Profile creation failed');
-    }
-    // Hash the password
-    const hashPassword = await bcrypt.hash(body.password, 12);
 
-    // Create and save the new User
-    const newUser = new UserModel({
-      email: body.email,
-      password: hashPassword,
-      role: body.role,
-      profileId: newProfile.id,
-    });
+    validateRoleData(body);
+
+    const hashPassword = await bcrypt.hash(body.password, 12);
+    body.password = hashPassword;
+
+    handleRoleData(body);
+
+    const newUser = new UserModel(prepareUserData(body, file));
 
     await newUser.save();
     return newUser;
@@ -65,86 +44,65 @@ export const createUser = async (req: Request): Promise<I_UserDocument> => {
   }
 };
 
-// Service to get user details
-export const getUser = async (headers: Headers): Promise<I_UserDocument> => {
+export const getUserById = async (req: Request): Promise<I_UserDocument> => {
   try {
-    if (!headers.authorization) {
-      throw new CustomError(401, 'Authorization header is missing');
-    }
-
-    const decodedJwt = await decodedJwtToken(headers.authorization);
-
-    const user = await UserModel.findById(decodedJwt.id);
-    if (!user) {
-      throw new CustomError(404, 'User not found');
-    }
-
-    return user;
-  } catch (error: any) {
-    console.error('Error in getUser:', error);
-    throw error;
-  }
-};
-
-export const getUserEmail = async (req: Request): Promise<string> => {
-  try {
-    const { profileId } = req.params; // sitterId or ownerId
-    if (!profileId || !mongoose.Types.ObjectId.isValid(profileId)) {
+    const { id } = req.params;
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       throw new CustomError(400, 'Invalid ID supplied');
     }
-    const user = await UserModel.findOne({ profileId: profileId });
-
+    const user = await UserModel.findById(id);
     if (!user) {
       throw new CustomError(404, 'User not found');
     }
-    return user.email;
+    return user;
   } catch (error: any) {
-    console.error('Error in getEmail:', error.message);
+    console.error('Error in getUserById:', error);
     throw error;
   }
 };
 
-// Service to update user details
-export const updateUser = async ({
-  headers,
-  body,
-}: {
-  headers: Headers;
-  body: I_UserUpdate;
-}): Promise<I_UserDocument> => {
+export const updateUser = async (
+  req: ExtendsRequest
+): Promise<I_UserDocument> => {
   try {
-    if (!headers.authorization) {
-      throw new CustomError(401, 'Authorization header is missing');
+    const { body, file, token } = req;
+    const user = await UserModel.findById(token?.id);
+
+    if (!user) {
+      throw new CustomError(404, 'User not found');
     }
 
-    const decodedJwt = await decodedJwtToken(headers.authorization);
-    const updateData: Partial<I_UserUpdate> = {};
+    validateRoleData(body);
 
-    // Update email if provided
-    if (body.email) {
-      const existingEmail = await UserModel.findOne({ email: body.email });
-      if (existingEmail) {
-        throw new CustomError(409, 'Email already exists');
-      }
-      updateData.email = body.email;
+    handleRoleData(body);
+
+    if (file) {
+      const oldImagePath = `./public/uploads/profilePicture${user.profilePicture}`;
+      deleteFile(oldImagePath);
+      user.profilePicture = `/${file.filename}`;
     }
 
-    // Update password if provided
-    if (body.password) {
-      const hashPassword = await bcrypt.hash(body.password, 12);
-      updateData.password = hashPassword;
+    user.firstName = capitalizeFirstLetter(body.firstName) || user.firstName;
+    user.lastName = capitalizeFirstLetter(body.lastName) || user.lastName;
+    user.city = capitalizeFirstLetter(body.city) || user.city;
+    user.country = capitalizeFirstLetter(body.country) || user.country;
+
+    if (user.roles.includes('sitter') && user.roleDetails.sitter) {
+      user.roleDetails.sitter.tel = body.tel || user.roleDetails.sitter.tel;
+      user.roleDetails.sitter.presentation =
+        body.presentation || user.roleDetails.sitter.presentation;
+      user.roleDetails.sitter.acceptedPets =
+        body.acceptedPets || user.roleDetails.sitter.acceptedPets;
     }
 
-    const updatedUser = await UserModel.findByIdAndUpdate(
-      decodedJwt.id,
-      { $set: updateData },
-      { new: true }
-    );
+    if (user.roles.includes('owner') && user.roleDetails.owner) {
+      user.roleDetails.owner.pets = body.pets || user.roleDetails.owner.pets;
+    }
 
+    const updatedUser = await user.save();
     if (!updatedUser) {
       throw new CustomError(404, 'User not found');
     }
-
     return updatedUser;
   } catch (error: any) {
     console.error('Error in updateUser:', error.message);
@@ -152,37 +110,22 @@ export const updateUser = async ({
   }
 };
 
-// Service to delete user
-export const deleteUser = async ({
-  headers,
-  body,
-}: {
-  headers: Headers;
-  body: I_User;
-}): Promise<void> => {
+export const deleteUser = async (req: ExtendsRequest): Promise<void> => {
   try {
-    if (!headers.authorization) {
-      throw new CustomError(401, 'Authorization header is missing');
-    }
-    const decodedJwt = await decodedJwtToken(headers.authorization);
-    const user = await UserModel.findById(decodedJwt.id);
+    const { token } = req;
+
+    const user = await UserModel.findById(token?.id);
 
     if (!user) {
       throw new CustomError(404, 'User not found');
     }
 
-    const isValid = await bcrypt.compare(body.password, user.password);
+    // const isValid = await bcrypt.compare(body.password, user.password);
 
-    if (body.email !== user.email || !isValid) {
-      throw new CustomError(400, 'Invalid email/password supplied');
-    }
+    // if (body.email !== user.email || !isValid) {
+    //   throw new CustomError(400, 'Invalid email/password supplied');
+    // }
 
-    if (user.role === 'sitter') {
-      await sitterService.deleteSitter(user.profileId);
-    }
-    if (user.role === 'owner') {
-      await ownerService.deleteOwner(user.profileId);
-    }
     await UserModel.findByIdAndDelete(user.id);
   } catch (error: any) {
     console.error('Error in deleteUser:', error.message);

@@ -21,13 +21,3 @@ export const getSitterById = async (req: Request, res: Response) => {
     successMessage
   );
 };
-
-export const updateSitter = (req: Request, res: Response) => {
-  const successMessage = 'Sitter updated successfully';
-  handleResponse(
-    'sitterController',
-    res,
-    sitterService.updateSitter(req),
-    successMessage
-  );
-};

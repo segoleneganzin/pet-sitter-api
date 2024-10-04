@@ -5,15 +5,16 @@ import { upload, handleError } from '../middleware/uploadMiddleware';
 
 const userRouter = Router();
 
-// Route to get user email by profileId
-// ownerId or sitterId (correspond to user profileId)
-userRouter.get('/:profileId', userController.getUserEmail);
+userRouter.get('/:id', userController.getUserById);
 
 userRouter
   .route('')
   .post(upload.single('profilePicture'), userController.createUser, handleError)
-  .get(validateToken, userController.getUser) // user id is in token
-  .patch(validateToken, userController.updateUser)
+  .patch(
+    validateToken,
+    upload.single('profilePicture'),
+    userController.updateUser
+  )
   .delete(validateToken, userController.deleteUser);
 
 export default userRouter;

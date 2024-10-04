@@ -1,29 +1,21 @@
-import { decodedJwtToken } from './decodedJwtToken';
 import mongoose from 'mongoose';
 import { UserModel } from '../database/models/userModel';
-
-interface DecodedJwt {
-  id: string;
-}
+import { CustomError } from './customError';
 
 export const validProfileAccess = async ({
-  authHeader,
-  profileId,
+  tokenId,
+  userId,
 }: {
-  authHeader: string;
-  profileId: mongoose.Types.ObjectId;
+  tokenId: string | undefined;
+  userId: mongoose.Types.ObjectId;
 }): Promise<void> => {
   try {
-    const decodedJwt: DecodedJwt = await decodedJwtToken(authHeader);
-    if (!mongoose.Types.ObjectId.isValid(decodedJwt.id)) {
-      throw new Error('Invalid user ID');
-    }
-    const user = await UserModel.findById(decodedJwt.id);
+    const user = await UserModel.findById(tokenId);
     if (!user) {
-      throw new Error('User not found');
+      throw new CustomError(404, 'User not found');
     }
-    if (!user.profileId || !profileId.equals(user.profileId)) {
-      throw new Error('Unauthorized access');
+    if (!userId.equals(user.id)) {
+      throw new CustomError(401, 'Unauthorized access');
     }
   } catch (error) {
     throw error;
