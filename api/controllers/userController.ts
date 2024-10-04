@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
-import * as userService from '../services/userService';
-import { handleResponseCreate, handleResponse } from '../utils/utilsController';
+import * as userService from '../services/userService.js';
+import {
+  handleResponseCreate,
+  handleResponse,
+} from '../utils/utilsController.js';
 
 export const createUser = (req: Request, res: Response) => {
   handleResponseCreate('userController', res, userService.createUser(req));

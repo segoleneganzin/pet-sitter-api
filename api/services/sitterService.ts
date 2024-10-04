@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import mongoose from 'mongoose';
-import { CustomError } from '../utils/customError';
-import { I_UserDocument, UserModel } from '../database/models/userModel';
+import { CustomError } from '../utils/customError.js';
+import { I_UserDocument, UserModel } from '../database/models/userModel.js';
 
 export const getAllSitters = async (): Promise<I_UserDocument[]> => {
   try {

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import * as sitterService from '../services/sitterService';
-import { handleResponse } from '../utils/utilsController';
+import * as sitterService from '../services/sitterService.js';
+import { handleResponse } from '../utils/utilsController.js';
 
 export const getAllSitters = (req: Request, res: Response) => {
   const successMessage = 'Sitters retrieved successfully';

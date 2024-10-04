@@ -1,12 +1,12 @@
 import { Request } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { CustomError } from '../utils/customError';
+import { CustomError } from '../utils/customError.js';
 import {
   I_Auth,
   I_UserDocument,
   UserModel,
-} from '../database/models/userModel';
+} from '../database/models/userModel.js';
 
 interface ExtendsRequest extends Request {
   token?: { id: string };

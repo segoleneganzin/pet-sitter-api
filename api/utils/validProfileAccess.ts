@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import { UserModel } from '../database/models/userModel';
-import { CustomError } from './customError';
+import { UserModel } from '../database/models/userModel.js';
+import { CustomError } from './customError.js';
 
 export const validProfileAccess = async ({
   tokenId,

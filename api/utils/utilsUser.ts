@@ -1,5 +1,5 @@
-import { CustomError } from './customError';
-import { capitalizeFirstLetter } from './formatWord';
+import { CustomError } from './customError.js';
+import { capitalizeFirstLetter } from './formatWord.js';
 
 export const handleRoleData = (body: any) => {
   if (typeof body.roles === 'string') {

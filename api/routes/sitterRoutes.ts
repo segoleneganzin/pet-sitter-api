@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import * as sitterController from '../controllers/sitterController';
+import * as sitterController from '../controllers/sitterController.js';
 
 const sitterRouter = Router();
 

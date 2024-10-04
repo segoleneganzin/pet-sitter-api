@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import * as ownerService from '../services/ownerService';
-import { handleResponse } from '../utils/utilsController';
+import * as ownerService from '../services/ownerService.js';
+import { handleResponse } from '../utils/utilsController.js';
 
 export const getAllOwners = (req: Request, res: Response) => {
   const successMessage = 'Owners retrieved successfully';

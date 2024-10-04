@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import * as userController from '../controllers/userController';
-import { validateToken } from '../middleware/tokenValidation';
-import { upload, handleError } from '../middleware/uploadMiddleware';
+import * as userController from '../controllers/userController.js';
+import { validateToken } from '../middleware/tokenValidation.js';
+import { upload, handleError } from '../middleware/uploadMiddleware.js';
 
 const userRouter = Router();
 

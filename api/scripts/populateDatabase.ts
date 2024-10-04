@@ -1,6 +1,6 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
-import { I_UserCreate } from '../database/models/userModel';
+import { I_UserCreate } from '../database/models/userModel.js';
 
 dotenv.config();
 

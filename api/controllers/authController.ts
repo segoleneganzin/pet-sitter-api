@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import * as authService from '../services/authService';
-import { handleResponse } from '../utils/utilsController';
+import * as authService from '../services/authService.js';
+import { handleResponse } from '../utils/utilsController.js';
 
 export const login = async (req: Request, res: Response) => {
   const successMessage = 'Successful login';
