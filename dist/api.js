@@ -29,9 +29,7 @@ const PORT = process.env.PORT || 3000;
     console.error('Failed to connect to the database', err);
     process.exit(1);
 });
-app.use((0, cors_1.default)({
-    origin: 'http://localhost:5173/',
-}));
+app.use((0, cors_1.default)());
 app.use(body_parser_1.default.json({ limit: '10mb' }));
 app.use(body_parser_1.default.urlencoded({ limit: '10mb', extended: true }));
 const staticFilesDirectory = path_1.default.join(__dirname, '../public/uploads');
