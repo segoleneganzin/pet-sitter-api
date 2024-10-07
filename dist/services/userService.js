@@ -67,19 +67,26 @@ const updateUser = async (req) => {
             (0, deleteFile_js_1.deleteFile)(oldImagePath);
             user.profilePicture = `/${file.filename}`;
         }
+        user.roles = body.roles || user.roles;
         user.firstName = (0, formatWord_js_1.capitalizeFirstLetter)(body.firstName) || user.firstName;
         user.lastName = (0, formatWord_js_1.capitalizeFirstLetter)(body.lastName) || user.lastName;
         user.city = (0, formatWord_js_1.capitalizeFirstLetter)(body.city) || user.city;
         user.country = (0, formatWord_js_1.capitalizeFirstLetter)(body.country) || user.country;
-        if (user.roles.includes('sitter') && user.roleDetails.sitter) {
+        if (body.roles.includes('sitter') && user.roleDetails.sitter) {
             user.roleDetails.sitter.tel = body.tel || user.roleDetails.sitter.tel;
             user.roleDetails.sitter.presentation =
                 body.presentation || user.roleDetails.sitter.presentation;
             user.roleDetails.sitter.acceptedPets =
                 body.acceptedPets || user.roleDetails.sitter.acceptedPets;
         }
-        if (user.roles.includes('owner') && user.roleDetails.owner) {
+        else {
+            user.roleDetails.sitter = null;
+        }
+        if (body.roles.includes('owner') && user.roleDetails.owner) {
             user.roleDetails.owner.pets = body.pets || user.roleDetails.owner.pets;
+        }
+        else {
+            user.roleDetails.owner = null;
         }
         const updatedUser = await user.save();
         if (!updatedUser) {

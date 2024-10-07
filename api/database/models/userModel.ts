@@ -19,10 +19,10 @@ export interface I_User extends I_Auth {
       tel?: string;
       presentation?: string;
       acceptedPets?: Pets[];
-    };
+    } | null;
     owner?: {
       pets?: Pets[];
-    };
+    } | null;
   };
 }
 

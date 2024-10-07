@@ -81,22 +81,26 @@ export const updateUser = async (
       deleteFile(oldImagePath);
       user.profilePicture = `/${file.filename}`;
     }
-
+    user.roles = body.roles || user.roles;
     user.firstName = capitalizeFirstLetter(body.firstName) || user.firstName;
     user.lastName = capitalizeFirstLetter(body.lastName) || user.lastName;
     user.city = capitalizeFirstLetter(body.city) || user.city;
     user.country = capitalizeFirstLetter(body.country) || user.country;
 
-    if (user.roles.includes('sitter') && user.roleDetails.sitter) {
+    if (body.roles.includes('sitter') && user.roleDetails.sitter) {
       user.roleDetails.sitter.tel = body.tel || user.roleDetails.sitter.tel;
       user.roleDetails.sitter.presentation =
         body.presentation || user.roleDetails.sitter.presentation;
       user.roleDetails.sitter.acceptedPets =
         body.acceptedPets || user.roleDetails.sitter.acceptedPets;
+    } else {
+      user.roleDetails.sitter = null;
     }
 
-    if (user.roles.includes('owner') && user.roleDetails.owner) {
+    if (body.roles.includes('owner') && user.roleDetails.owner) {
       user.roleDetails.owner.pets = body.pets || user.roleDetails.owner.pets;
+    } else {
+      user.roleDetails.owner = null;
     }
 
     const updatedUser = await user.save();
