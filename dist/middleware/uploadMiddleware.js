@@ -8,7 +8,7 @@ const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
 const customError_1 = require("api/utils/customError");
 const fileFilter = (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png/;
+    const allowedTypes = /jpeg|jpg|png|webp/;
     const errorMessage = 'Invalid file type. Only JPG, JPEG, and PNG files are allowed.';
     const extname = allowedTypes.test(path_1.default.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
