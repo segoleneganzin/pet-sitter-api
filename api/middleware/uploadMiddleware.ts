@@ -8,7 +8,7 @@ const fileFilter = (
   file: Express.Multer.File,
   cb: FileFilterCallback
 ) => {
-  const allowedTypes = /jpeg|jpg|png/;
+  const allowedTypes = /jpeg|jpg|png|webp/;
   const errorMessage =
     'Invalid file type. Only JPG, JPEG, and PNG files are allowed.';
   const extname = allowedTypes.test(
