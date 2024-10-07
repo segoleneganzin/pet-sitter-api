@@ -1,6 +1,7 @@
 import multer, { FileFilterCallback } from 'multer';
 import path from 'path';
 import { Request, Response, NextFunction } from 'express';
+import { CustomError } from 'api/utils/customError';
 
 const fileFilter = (
   req: Request,
@@ -18,7 +19,7 @@ const fileFilter = (
   if (extname && mimetype) {
     return cb(null, true);
   } else {
-    cb(new Error(errorMessage));
+    cb(new CustomError(401, errorMessage));
   }
 };
 
