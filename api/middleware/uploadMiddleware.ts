@@ -1,7 +1,7 @@
 import multer, { FileFilterCallback } from 'multer';
 import path from 'path';
 import { Request, Response, NextFunction } from 'express';
-import { CustomError } from 'api/utils/customError';
+import { CustomError } from 'api/utils/customError.js';
 
 const fileFilter = (
   req: Request,
