@@ -1,14 +1,13 @@
 import multer, { FileFilterCallback } from 'multer';
 import path from 'path';
 import { Request, Response, NextFunction } from 'express';
-import { CustomError } from 'api/utils/customError.js';
 
 const fileFilter = (
   req: Request,
   file: Express.Multer.File,
   cb: FileFilterCallback
 ) => {
-  const allowedTypes = /jpeg|jpg|png|webp/;
+  const allowedTypes = /jpeg|jpg|png/;
   const errorMessage =
     'Invalid file type. Only JPG, JPEG, and PNG files are allowed.';
   const extname = allowedTypes.test(
@@ -19,7 +18,7 @@ const fileFilter = (
   if (extname && mimetype) {
     return cb(null, true);
   } else {
-    cb(new CustomError(401, errorMessage));
+    cb(new Error(errorMessage));
   }
 };
 

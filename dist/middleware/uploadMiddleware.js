@@ -6,9 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.handleError = exports.upload = void 0;
 const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
-const customError_js_1 = require("api/utils/customError.js");
 const fileFilter = (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|webp/;
+    const allowedTypes = /jpeg|jpg|png/;
     const errorMessage = 'Invalid file type. Only JPG, JPEG, and PNG files are allowed.';
     const extname = allowedTypes.test(path_1.default.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
@@ -16,7 +15,7 @@ const fileFilter = (req, file, cb) => {
         return cb(null, true);
     }
     else {
-        cb(new customError_js_1.CustomError(401, errorMessage));
+        cb(new Error(errorMessage));
     }
 };
 // Multer setup for file uploads
